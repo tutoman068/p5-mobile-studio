@@ -1,23 +1,22 @@
 # p5 Mobile Studio
 
-## 🚨 Khắc phục lỗi "The name contains invalid characters" trên Vercel
+## 🚨 Khắc phục lỗi "The name contains invalid characters"
 
-Lỗi này xuất hiện khi bạn đặt tên **Biến môi trường (Environment Variable)** sai quy tắc.
+Lỗi này xuất hiện do quy tắc đặt tên của Vercel (Project Name hoặc Env Var).
 
-### ✅ Cài đặt ĐÚNG (Environment Variables)
-Vào **Settings** > **Environment Variables** trên Vercel và đặt như sau:
-*   **Key (Name):** `API_KEY`
-    *   Chỉ dùng chữ hoa và dấu gạch dưới `_`.
-    *   KHÔNG dùng dấu gạch ngang `-`.
-*   **Value:** Dán khóa API của bạn vào (bắt đầu bằng `AIza...`).
+### 1. Kiểm tra Project Name (Tên dự án)
+Khi bạn bấm **Import** trên Vercel:
+*   Vercel sẽ tự động điền tên là `p5-mobile-studio` (theo tên GitHub).
+*   **HÃY SỬA LẠI THÀNH:** `p5mobilestudio` hoặc `p5_mobile_studio`.
+*   *(Lý do: Một số tổ chức/team trên Vercel không cho phép dấu gạch ngang `-` trong tên dự án)*.
 
-### ❌ Cài đặt SAI (Sẽ gây lỗi)
-*   `API-KEY` (Lỗi do có dấu gạch ngang `-`)
-*   `GEMINI-KEY` (Lỗi do có dấu gạch ngang `-`)
-*   `Gemini Key` (Lỗi do có khoảng trắng)
+### 2. Kiểm tra Environment Variables (Biến môi trường)
+Vào **Settings** > **Environment Variables**:
+*   **Key:** `API_KEY` (Bắt buộc dùng gạch dưới `_`, KHÔNG dùng gạch ngang `-`).
+*   **Value:** `AIza...`
 
 ## Cài đặt Local
-Tạo file `.env` ở thư mục gốc:
-```
-API_KEY=your_api_key_here
-```
+1. Clone repo.
+2. `npm install`
+3. Tạo file `.env`: `API_KEY=your_key`
+4. `npm run dev`
