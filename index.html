@@ -6,7 +6,7 @@
     
     <!-- iOS PWA Settings -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <!-- Changed to default or black to avoid status bar text clashing with header content on some devices -->
+    <!-- Changed to black-translucent so content shows behind status bar -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="p5 Studio">
     <meta name="theme-color" content="#2D2D2D">
@@ -62,10 +62,8 @@
         color: white;
       }
 
-      /* Fix for safe areas inside the fixed body */
+      /* Body padding removed. Safe areas are now handled by Header/Footer components */
       body {
-        padding-top: env(safe-area-inset-top);
-        padding-bottom: env(safe-area-inset-bottom);
         display: flex;
         flex-direction: column;
       }
