@@ -96,15 +96,22 @@ function App() {
   return (
     <div className="h-full w-full flex flex-col bg-[#18181b] overflow-hidden text-white relative">
       {/* Header / Top Bar */}
-      <header className="h-14 bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-center justify-between px-4 shrink-0 z-10 select-none">
-        <div className="flex items-center gap-2">
+      {/* We add explicit style for safe-area-inset-top to handle the notch cleanly */}
+      <header 
+        className="bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-end justify-between px-4 pb-2 shrink-0 z-10 select-none"
+        style={{
+          paddingTop: 'env(safe-area-inset-top)',
+          height: 'calc(3.5rem + env(safe-area-inset-top))' // 3.5rem is standard h-14
+        }}
+      >
+        <div className="flex items-center gap-2 h-8">
           <div className="w-8 h-8 bg-[#ED225D] flex items-center justify-center rounded-lg font-bold text-white shadow-lg shadow-pink-900/50">
             p5
           </div>
           <span className="font-bold text-lg hidden sm:block">Mobile Studio</span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 h-8">
           <button
             onClick={() => setIsAIModalOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-900/50 to-purple-800/50 border border-purple-500/30 text-purple-300 text-xs font-semibold hover:bg-purple-800/50 transition-all active:scale-95"
@@ -171,10 +178,18 @@ function App() {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="h-16 bg-[#2D2D2D] border-t border-[#3D3D3D] flex items-center justify-around shrink-0 z-10 select-none safe-area-pb">
+      {/* We add explicit style for safe-area-inset-bottom to handle the home indicator cleanly */}
+      <nav 
+        className="bg-[#2D2D2D] border-t border-[#3D3D3D] flex items-start justify-around shrink-0 z-10 select-none"
+        style={{
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          height: 'calc(4rem + env(safe-area-inset-bottom))', // 4rem is standard h-16
+          paddingTop: '0.5rem' // Standard py-2
+        }}
+      >
         <button
           onClick={() => setActiveTab(Tab.EDITOR)}
-          className={`flex flex-col items-center gap-1 p-2 w-full transition-colors active:scale-95 ${activeTab === Tab.EDITOR ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
+          className={`flex flex-col items-center gap-1 w-full transition-colors active:scale-95 ${activeTab === Tab.EDITOR ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
         >
           <CodeIcon size={20} />
           <span className="text-[10px] font-medium">Code</span>
@@ -182,7 +197,7 @@ function App() {
 
         <button
           onClick={() => setActiveTab(Tab.PREVIEW)}
-          className={`flex flex-col items-center gap-1 p-2 w-full transition-colors active:scale-95 ${activeTab === Tab.PREVIEW ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
+          className={`flex flex-col items-center gap-1 w-full transition-colors active:scale-95 ${activeTab === Tab.PREVIEW ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
         >
           <Eye size={20} />
           <span className="text-[10px] font-medium">Preview</span>
@@ -193,7 +208,7 @@ function App() {
             setIsConsoleOpen(!isConsoleOpen);
             setUnreadLogs(false);
           }}
-          className={`flex flex-col items-center gap-1 p-2 w-full transition-colors relative active:scale-95 ${isConsoleOpen ? 'text-white bg-gray-700/50' : 'text-gray-400 hover:text-white'}`}
+          className={`flex flex-col items-center gap-1 w-full transition-colors relative active:scale-95 ${isConsoleOpen ? 'text-white bg-gray-700/50 rounded-lg mx-2' : 'text-gray-400 hover:text-white'}`}
         >
           <div className="relative">
             <Terminal size={20} />
