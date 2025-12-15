@@ -1,3 +1,4 @@
+
 export const generateP5HTML = (code: string) => `
 <!DOCTYPE html>
 <html>
@@ -6,8 +7,26 @@ export const generateP5HTML = (code: string) => `
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <style>
-      body { margin: 0; padding: 0; overflow: hidden; background-color: #18181b; display: flex; justify-content: center; align-items: center; height: 100vh; }
-      canvas { display: block; }
+      body { 
+        margin: 0; 
+        padding: 0; 
+        overflow: hidden; 
+        background-color: #18181b; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        height: 100vh;
+        width: 100vw;
+        /* CRITICAL: Disables browser handling of gestures so p5 can use them */
+        touch-action: none; 
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+      }
+      canvas { 
+        display: block; 
+        touch-action: none;
+      }
     </style>
     <script>
       // Capture console logs and errors to send back to parent
@@ -52,6 +71,9 @@ export const generateP5HTML = (code: string) => `
   </head>
   <body>
     <script>
+      // Prevent default touch behaviors in the iframe
+      document.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+      
       try {
         ${code}
       } catch (e) {
