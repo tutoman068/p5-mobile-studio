@@ -1,20 +1,23 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# p5 Mobile Studio
 
-# Run and deploy your AI Studio app
+## 🚨 Khắc phục lỗi "The name contains invalid characters" trên Vercel
 
-This contains everything you need to run your app locally.
+Lỗi này xuất hiện khi bạn đặt tên **Biến môi trường (Environment Variable)** sai quy tắc.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1R4ad7gQ9lMdZCupYnkmPhqMfFwsKcNCp
+### ✅ Cài đặt ĐÚNG (Environment Variables)
+Vào **Settings** > **Environment Variables** trên Vercel và đặt như sau:
+*   **Key (Name):** `API_KEY`
+    *   Chỉ dùng chữ hoa và dấu gạch dưới `_`.
+    *   KHÔNG dùng dấu gạch ngang `-`.
+*   **Value:** Dán khóa API của bạn vào (bắt đầu bằng `AIza...`).
 
-## Run Locally
+### ❌ Cài đặt SAI (Sẽ gây lỗi)
+*   `API-KEY` (Lỗi do có dấu gạch ngang `-`)
+*   `GEMINI-KEY` (Lỗi do có dấu gạch ngang `-`)
+*   `Gemini Key` (Lỗi do có khoảng trắng)
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Cài đặt Local
+Tạo file `.env` ở thư mục gốc:
+```
+API_KEY=your_api_key_here
+```
