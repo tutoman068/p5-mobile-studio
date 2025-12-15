@@ -1,5 +1,5 @@
 {
-  "name": "p5.js Mobile Studio",
+  "name": "p5_mobile_studio",
   "description": "A powerful, mobile-optimized p5.js editor for iPhone. Write, run, and generate creative code with Gemini AI assistance.",
   "requestFramePermissions": [
     "camera",
