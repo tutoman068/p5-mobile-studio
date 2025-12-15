@@ -6,9 +6,13 @@
     
     <!-- iOS PWA Settings -->
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- Changed to default or black to avoid status bar text clashing with header content on some devices -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="p5 Studio">
     <meta name="theme-color" content="#2D2D2D">
+    
+    <!-- App Icon (Data URI for p5 logo to avoid hosting images) -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23ED225D'/%3E%3Cpath d='M160 160h60v192h-60zm100 0h60v40h60v60h-60v42h60v50h-120z' fill='white'/%3E%3C/svg%3E">
     
     <title>p5.js Mobile Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -46,14 +50,34 @@
         background: #4b5563; 
         border-radius: 4px;
       }
-      body {
+      
+      html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* Critical for locking the app */
+        position: fixed; /* Super critical for iOS to prevent rubber banding */
         background-color: #18181b;
         color: white;
-        overscroll-behavior: none;
-        /* Safe area for iPhone notch/home bar */
+      }
+
+      /* Fix for safe areas inside the fixed body */
+      body {
         padding-top: env(safe-area-inset-top);
         padding-bottom: env(safe-area-inset-bottom);
+        display: flex;
+        flex-direction: column;
       }
+
+      #root {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
       textarea {
         outline: none !important;
       }
@@ -85,6 +109,28 @@
           document.body.innerHTML += '<div style="padding: 20px; color: red;"><h1>Startup Error</h1><p>' + msg + '</p></div>';
         }
       };
+      
+      // Prevent default touch moves globally to stop rubber banding
+      // except in scrollable containers
+      document.addEventListener('touchmove', function(e) {
+        let target = e.target;
+        let isScrollable = false;
+        
+        while (target && target !== document.body) {
+          if (target.classList && (target.classList.contains('overflow-auto') || target.classList.contains('overflow-y-auto'))) {
+            // Check if it actually has scrollable content
+            if (target.scrollHeight > target.clientHeight) {
+              isScrollable = true;
+              break;
+            }
+          }
+          target = target.parentNode;
+        }
+
+        if (!isScrollable) {
+          e.preventDefault();
+        }
+      }, { passive: false });
     </script>
   </body>
 </html>
