@@ -94,9 +94,9 @@ function App() {
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col bg-[#18181b] overflow-hidden text-white">
+    <div className="h-full w-full flex flex-col bg-[#18181b] overflow-hidden text-white relative">
       {/* Header / Top Bar */}
-      <header className="h-14 bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-center justify-between px-4 shrink-0 z-10">
+      <header className="h-14 bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-center justify-between px-4 shrink-0 z-10 select-none">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-[#ED225D] flex items-center justify-center rounded-lg font-bold text-white shadow-lg shadow-pink-900/50">
             p5
@@ -107,7 +107,7 @@ function App() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsAIModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-900/50 to-purple-800/50 border border-purple-500/30 text-purple-300 text-xs font-semibold hover:bg-purple-800/50 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-900/50 to-purple-800/50 border border-purple-500/30 text-purple-300 text-xs font-semibold hover:bg-purple-800/50 transition-all active:scale-95"
           >
             <Sparkles size={14} />
             <span>AI Assist</span>
@@ -115,7 +115,7 @@ function App() {
           
           <button
             onClick={isRunning ? stopSketch : runSketch}
-            className={`flex items-center gap-2 px-4 py-1.5 rounded-lg font-bold text-sm transition-all shadow-lg ${
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-lg font-bold text-sm transition-all shadow-lg active:scale-95 ${
               isRunning 
                 ? 'bg-red-500/10 text-red-400 border border-red-500/50 hover:bg-red-500/20' 
                 : 'bg-[#ED225D] text-white hover:bg-[#c91d4e] shadow-pink-900/50'
@@ -137,20 +137,21 @@ function App() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 relative overflow-hidden">
+      <main className="flex-1 relative overflow-hidden w-full">
         {/* Editor Tab */}
-        <div className={`absolute inset-0 transition-transform duration-300 transform ${activeTab === Tab.EDITOR ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className={`absolute inset-0 transition-transform duration-300 transform w-full h-full ${activeTab === Tab.EDITOR ? 'translate-x-0' : '-translate-x-full'}`}>
           <CodeEditor code={code} onChange={setCode} />
         </div>
 
-        {/* Preview Tab */}
-        <div className={`absolute inset-0 bg-[#18181b] transition-transform duration-300 transform ${activeTab === Tab.PREVIEW ? 'translate-x-0' : 'translate-x-full'}`}>
+        {/* Preview Tab - Added touch-action-none to prevent gestures on the container */}
+        <div className={`absolute inset-0 bg-[#18181b] transition-transform duration-300 transform w-full h-full touch-none ${activeTab === Tab.PREVIEW ? 'translate-x-0' : 'translate-x-full'}`}>
           {isRunning && iframeSrc ? (
              <iframe
              src={iframeSrc}
-             className="w-full h-full border-none"
+             className="w-full h-full border-none block"
              title="p5.js sketch preview"
              allow="camera; microphone; geolocation"
+             scrolling="no"
            />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-gray-500 gap-4">
@@ -170,10 +171,10 @@ function App() {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="h-16 bg-[#2D2D2D] border-t border-[#3D3D3D] flex items-center justify-around shrink-0 pb-safe z-10">
+      <nav className="h-16 bg-[#2D2D2D] border-t border-[#3D3D3D] flex items-center justify-around shrink-0 z-10 select-none safe-area-pb">
         <button
           onClick={() => setActiveTab(Tab.EDITOR)}
-          className={`flex flex-col items-center gap-1 p-2 w-full transition-colors ${activeTab === Tab.EDITOR ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
+          className={`flex flex-col items-center gap-1 p-2 w-full transition-colors active:scale-95 ${activeTab === Tab.EDITOR ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
         >
           <CodeIcon size={20} />
           <span className="text-[10px] font-medium">Code</span>
@@ -181,7 +182,7 @@ function App() {
 
         <button
           onClick={() => setActiveTab(Tab.PREVIEW)}
-          className={`flex flex-col items-center gap-1 p-2 w-full transition-colors ${activeTab === Tab.PREVIEW ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
+          className={`flex flex-col items-center gap-1 p-2 w-full transition-colors active:scale-95 ${activeTab === Tab.PREVIEW ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
         >
           <Eye size={20} />
           <span className="text-[10px] font-medium">Preview</span>
@@ -192,7 +193,7 @@ function App() {
             setIsConsoleOpen(!isConsoleOpen);
             setUnreadLogs(false);
           }}
-          className={`flex flex-col items-center gap-1 p-2 w-full transition-colors relative ${isConsoleOpen ? 'text-white bg-gray-700/50' : 'text-gray-400 hover:text-white'}`}
+          className={`flex flex-col items-center gap-1 p-2 w-full transition-colors relative active:scale-95 ${isConsoleOpen ? 'text-white bg-gray-700/50' : 'text-gray-400 hover:text-white'}`}
         >
           <div className="relative">
             <Terminal size={20} />
