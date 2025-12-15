@@ -2,8 +2,14 @@ import { GoogleGenAI } from "@google/genai";
 
 export const generateP5Code = async (prompt: string, currentCode: string): Promise<string> => {
   try {
+    const apiKey = process.env.API_KEY;
+    
+    if (!apiKey || apiKey.includes("undefined")) {
+      throw new Error("Missing Gemini API Key. Please add API_KEY in Vercel Environment Variables.");
+    }
+
     // Initialize inside the function to be safe against load-time environment issues
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: apiKey });
     
     const fullPrompt = `
       You are an expert creative coder using p5.js.
@@ -35,8 +41,12 @@ export const generateP5Code = async (prompt: string, currentCode: string): Promi
     code = code.replace(/```javascript/g, '').replace(/```/g, '').trim();
     
     return code;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini API Error:", error);
+    // Pass the specific error message if it's our missing key error
+    if (error.message.includes("Missing Gemini API Key")) {
+      throw error;
+    }
     throw new Error("Failed to generate code. Please check your connection or try a different prompt.");
   }
 };
