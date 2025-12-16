@@ -188,19 +188,20 @@ function App() {
   };
 
   return (
-    // MAIN LAYOUT STRATEGY: Flex column with 100dvh.
-    // Header and Footer are shrink-0. Main is flex-1.
-    // This avoids fixed positioning issues on iOS.
+    // MAIN LAYOUT:
+    // Header: Fixed Top
+    // Footer: Fixed Bottom
+    // Main: Flex-1, scrollable, with padding to avoid overlap
     <div className="flex flex-col h-[100dvh] w-full bg-[#18181b] overflow-hidden text-white relative">
       
-      {/* HEADER */}
+      {/* HEADER - Fixed Top */}
       <header 
-        className="bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-end justify-between px-4 pb-3 shrink-0 z-20 select-none shadow-lg relative"
+        className="fixed top-0 left-0 right-0 bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-end justify-between px-4 pb-3 z-50 select-none shadow-lg"
         style={{
-          paddingTop: 'calc(0.5rem + env(safe-area-inset-top))', // Dynamic top padding
+          paddingTop: 'calc(0.5rem + env(safe-area-inset-top))',
+          height: 'calc(4rem + env(safe-area-inset-top))' // Explicit height for padding calc
         }}
       >
-        {/* Left: Logo */}
         <div className="flex items-center gap-2">
           <div className="w-9 h-9 bg-[#ED225D] flex items-center justify-center rounded-xl font-bold text-white shadow-lg shadow-pink-900/50">
             p5
@@ -213,27 +214,21 @@ function App() {
           </div>
         </div>
 
-        {/* Right: Toolbar Actions */}
         <div className="flex items-center gap-2">
-          {/* File Manager Button (New, Large) */}
           <button
             onClick={() => setIsFileManagerOpen(true)}
             className="flex items-center justify-center w-10 h-10 rounded-full bg-[#3D3D3D] text-gray-300 hover:bg-[#4D4D4D] hover:text-white transition-all active:scale-95 border border-white/5"
-            aria-label="Files"
           >
             <FolderOpen size={18} />
           </button>
 
-          {/* AI Assistant Button */}
           <button
             onClick={() => setIsAIModalOpen(true)}
             className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-tr from-purple-900 to-purple-700 border border-purple-500/30 text-purple-200 hover:brightness-110 transition-all active:scale-95 shadow-lg shadow-purple-900/30"
-            aria-label="AI Assistant"
           >
             <Sparkles size={18} />
           </button>
           
-          {/* Run/Stop Button */}
           <button
             onClick={isRunning ? stopSketch : runSketch}
             className={`flex items-center gap-2 px-4 h-10 rounded-full font-bold text-sm transition-all shadow-lg active:scale-95 border ${
@@ -258,8 +253,13 @@ function App() {
       </header>
 
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 relative overflow-hidden w-full bg-[#1e1e1e]">
-        {/* Editor Tab */}
+      <main 
+        className="flex-1 relative overflow-hidden w-full bg-[#1e1e1e]"
+        style={{
+          marginTop: 'calc(4rem + env(safe-area-inset-top))', // Space for Header
+          marginBottom: 'calc(3.5rem + env(safe-area-inset-bottom))' // Space for Footer
+        }}
+      >
         <div className={`absolute inset-0 transition-transform duration-300 transform w-full h-full ${activeTab === Tab.EDITOR ? 'translate-x-0' : '-translate-x-full'}`}>
           {activeFile.type === 'javascript' ? (
              <CodeEditor 
@@ -278,7 +278,6 @@ function App() {
           )}
         </div>
 
-        {/* Preview Tab */}
         <div className={`absolute inset-0 bg-[#18181b] transition-transform duration-300 transform w-full h-full touch-none ${activeTab === Tab.PREVIEW ? 'translate-x-0' : 'translate-x-full'}`}>
           {isRunning && iframeSrc ? (
              <iframe
@@ -295,28 +294,28 @@ function App() {
             </div>
           )}
         </div>
-
-        {/* Console Overlay (Absolute inside Main) */}
-        <Console 
-          logs={logs} 
-          isOpen={isConsoleOpen} 
-          onClose={() => setIsConsoleOpen(false)} 
-          onClear={() => setLogs([])} 
-        />
       </main>
 
-      {/* FOOTER */}
+      {/* CONSOLE (Now sits above Footer) */}
+      <Console 
+        logs={logs} 
+        isOpen={isConsoleOpen} 
+        onClose={() => setIsConsoleOpen(false)} 
+        onClear={() => setLogs([])} 
+      />
+
+      {/* FOOTER - Fixed Bottom */}
       <nav 
-        className="bg-[#2D2D2D] border-t border-[#3D3D3D] flex items-center justify-around shrink-0 z-20 select-none w-full"
+        className="fixed bottom-0 left-0 right-0 bg-[#2D2D2D] border-t border-[#3D3D3D] flex items-center justify-around z-50 select-none backdrop-blur-md bg-[#2D2D2D]/95"
         style={{
           paddingBottom: 'env(safe-area-inset-bottom)',
-          paddingTop: '0.75rem',
-          minHeight: 'calc(3.5rem + env(safe-area-inset-bottom))'
+          height: 'calc(3.5rem + env(safe-area-inset-bottom))',
+          paddingTop: '0.5rem'
         }}
       >
         <button
           onClick={() => setActiveTab(Tab.EDITOR)}
-          className={`flex flex-col items-center gap-1 w-full pb-2 transition-colors active:scale-95 ${activeTab === Tab.EDITOR ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
+          className={`flex flex-col items-center gap-1 w-full pb-1 transition-colors active:scale-95 ${activeTab === Tab.EDITOR ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
         >
           <CodeIcon size={20} />
           <span className="text-[10px] font-medium">Code</span>
@@ -324,7 +323,7 @@ function App() {
 
         <button
           onClick={() => setActiveTab(Tab.PREVIEW)}
-          className={`flex flex-col items-center gap-1 w-full pb-2 transition-colors active:scale-95 ${activeTab === Tab.PREVIEW ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
+          className={`flex flex-col items-center gap-1 w-full pb-1 transition-colors active:scale-95 ${activeTab === Tab.PREVIEW ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
         >
           <Eye size={20} />
           <span className="text-[10px] font-medium">Preview</span>
@@ -335,7 +334,7 @@ function App() {
             setIsConsoleOpen(!isConsoleOpen);
             setUnreadLogs(false);
           }}
-          className={`flex flex-col items-center gap-1 w-full pb-2 transition-colors relative active:scale-95 ${isConsoleOpen ? 'text-white' : 'text-gray-400 hover:text-white'}`}
+          className={`flex flex-col items-center gap-1 w-full pb-1 transition-colors relative active:scale-95 ${isConsoleOpen ? 'text-white' : 'text-gray-400 hover:text-white'}`}
         >
           <div className="relative">
             <Terminal size={20} />
