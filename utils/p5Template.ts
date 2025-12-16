@@ -1,5 +1,37 @@
 
-export const generateP5HTML = (code: string) => `
+import { AppFile } from '../types';
+
+export const generateP5HTML = (mainCode: string, files: AppFile[]) => {
+  // 1. Separate JS files and Assets
+  const jsFiles = files.filter(f => f.type === 'javascript' && f.name !== 'sketch.js');
+  const assets = files.filter(f => f.type === 'image' || f.type === 'video');
+
+  // 2. Prepare Asset Replacement Logic
+  // We need to replace string literals in the code that match asset filenames with their blob URLs
+  let processedMainCode = mainCode;
+  let processedExtraJs = "";
+
+  // Helper to replace filenames in code
+  const replaceAssetsInCode = (code: string) => {
+    let newCode = code;
+    assets.forEach(asset => {
+      // Regex looks for "filename.ext" or 'filename.ext'
+      // We escape the filename to be regex safe
+      const escapedName = asset.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(['"])${escapedName}(['"])`, 'g');
+      newCode = newCode.replace(regex, `$1${asset.content}$2`);
+    });
+    return newCode;
+  };
+
+  processedMainCode = replaceAssetsInCode(mainCode);
+  
+  // 3. Concatenate extra JS files (Classes, etc.) BEFORE the main script
+  jsFiles.forEach(file => {
+    processedExtraJs += `\n/* File: ${file.name} */\n${replaceAssetsInCode(file.content)}\n`;
+  });
+
+  return `
 <!DOCTYPE html>
 <html>
   <head>
@@ -43,7 +75,7 @@ export const generateP5HTML = (code: string) => `
               message: args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')
             }, '*');
           } catch (e) {
-            // circular reference or other error
+            // circular reference
           }
         }
 
@@ -74,8 +106,12 @@ export const generateP5HTML = (code: string) => `
       // Prevent default touch behaviors in the iframe
       document.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
       
+      // Inject Extra JS Files (Classes, Utilities)
+      ${processedExtraJs}
+
+      // Main Sketch
       try {
-        ${code}
+        ${processedMainCode}
       } catch (e) {
         console.error(e);
       }
@@ -83,3 +119,4 @@ export const generateP5HTML = (code: string) => `
   </body>
 </html>
 `;
+};
