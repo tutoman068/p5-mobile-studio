@@ -187,21 +187,17 @@ function App() {
     updateFileContent(newCode);
   };
 
-  // LAYOUT STRATEGY: ABSOLUTE POSITIONING
-  // Root container is FIXED to viewport (inset-0).
-  // All children are ABSOLUTE relative to the root.
-  // This is more robust on iOS than mixing fixed children within a fixed parent.
-
   return (
-    // ROOT: Fixed to viewport, no scrolling on body.
-    <div className="fixed inset-0 w-full h-[100dvh] bg-[#18181b] overflow-hidden text-white font-sans touch-none select-none">
+    // ROOT: Flex Column Layout. 100dvh ensures it fits the viewport exactly on mobile.
+    <div className="fixed inset-0 w-full h-[100dvh] bg-[#18181b] flex flex-col overflow-hidden text-white font-sans touch-none select-none">
       
-      {/* HEADER: Absolute Top, Z-50 */}
+      {/* HEADER: Fixed height, no absolute positioning needed in flex column */}
       <header 
-        className="absolute top-0 left-0 right-0 bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-end justify-between px-4 pb-3 z-50 shadow-lg"
+        className="shrink-0 bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-end justify-between px-4 pb-3 z-30 shadow-lg relative"
         style={{
-          height: 'calc(4rem + env(safe-area-inset-top))',
-          paddingTop: 'env(safe-area-inset-top)'
+          // Use padding for safe area, content height is standard 4rem (64px)
+          paddingTop: 'calc(0.5rem + env(safe-area-inset-top))',
+          height: 'calc(4rem + env(safe-area-inset-top))'
         }}
       >
         <div className="flex items-center gap-2">
@@ -254,15 +250,8 @@ function App() {
         </div>
       </header>
 
-      {/* MAIN: Anchored explicitly between Header and Footer using absolute */}
-      <main 
-        className="absolute left-0 right-0 bg-[#1e1e1e] overflow-hidden"
-        style={{
-          top: 'calc(4rem + env(safe-area-inset-top))',
-          bottom: 'calc(3.5rem + env(safe-area-inset-bottom))',
-          zIndex: 0
-        }}
-      >
+      {/* MAIN: Flex-1 fills available space automatically */}
+      <main className="flex-1 relative w-full overflow-hidden bg-[#1e1e1e] z-0">
         <div className={`absolute inset-0 transition-transform duration-300 transform w-full h-full ${activeTab === Tab.EDITOR ? 'translate-x-0' : '-translate-x-full'}`}>
           {activeFile.type === 'javascript' ? (
              <CodeEditor 
@@ -299,20 +288,14 @@ function App() {
         </div>
       </main>
 
-      {/* CONSOLE: Absolute Bottom, Z-40 (Lower than Footer Z-50) */}
-      <Console 
-        logs={logs} 
-        isOpen={isConsoleOpen} 
-        onClose={() => setIsConsoleOpen(false)} 
-        onClear={() => setLogs([])} 
-      />
-
-      {/* FOOTER: Absolute Bottom, Z-50 */}
+      {/* FOOTER: Fixed height, anchored in flex flow */}
       <nav 
-        className="absolute bottom-0 left-0 right-0 bg-[#2D2D2D] border-t border-[#3D3D3D] flex items-center justify-around z-50 select-none shadow-[0_-4px_10px_rgba(0,0,0,0.3)]"
+        className="shrink-0 w-full bg-[#2D2D2D] border-t border-[#3D3D3D] flex items-center justify-around z-30 select-none shadow-[0_-4px_10px_rgba(0,0,0,0.2)] relative"
         style={{
-          height: 'calc(3.5rem + env(safe-area-inset-bottom))',
-          paddingBottom: 'env(safe-area-inset-bottom)'
+          // Padding bottom handles the home indicator area
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          // Total height = content (3.5rem) + safe area
+          height: 'calc(3.5rem + env(safe-area-inset-bottom))'
         }}
       >
         <button
@@ -350,6 +333,14 @@ function App() {
           <span className="text-[10px] font-medium">Console</span>
         </button>
       </nav>
+
+      {/* CONSOLE: Overlay on TOP of everything (Z-60) */}
+      <Console 
+        logs={logs} 
+        isOpen={isConsoleOpen} 
+        onClose={() => setIsConsoleOpen(false)} 
+        onClear={() => setLogs([])} 
+      />
 
       {/* Overlays */}
       <AIAssistant 
