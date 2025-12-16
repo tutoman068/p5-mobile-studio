@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import CodeEditor from './components/Editor';
 import { generateP5HTML } from './utils/p5Template';
@@ -186,7 +185,8 @@ function App() {
   };
 
   return (
-    <div className="h-full w-full flex flex-col bg-[#18181b] overflow-hidden text-white relative">
+    // Used h-[100dvh] to force dynamic viewport height matching on iOS Safari
+    <div className="h-[100dvh] w-full flex flex-col bg-[#18181b] overflow-hidden text-white relative">
       {/* Header */}
       <header 
         className="bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-end justify-between px-4 pb-2 shrink-0 z-10 select-none relative shadow-lg"
@@ -284,7 +284,7 @@ function App() {
         style={{
           paddingBottom: 'env(safe-area-inset-bottom)',
           paddingTop: '8px',
-          height: 'auto' // Allow container to grow naturally with safe area
+          height: 'auto'
         }}
       >
         <button
