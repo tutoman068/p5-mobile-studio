@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -67,9 +68,7 @@
         overflow: hidden; /* Critical for locking the app */
         background-color: #18181b;
         color: white;
-        /* Ensure safe areas don't create white bars */
-        padding-top: env(safe-area-inset-top);
-        padding-bottom: env(safe-area-inset-bottom);
+        /* REMOVED safe-area padding here to let App.tsx handle it precisely */
         box-sizing: border-box;
       }
 
