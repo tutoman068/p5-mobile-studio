@@ -186,12 +186,12 @@ function App() {
   };
 
   return (
-    // ROOT: h-full matches fixed body height, flex container for header/main/footer
-    <div className="flex flex-col w-full h-full bg-[#18181b] overflow-hidden text-white font-sans touch-none select-none">
+    // ROOT: Container for fixed positioned elements
+    <div className="relative w-full h-full bg-[#18181b] overflow-hidden text-white font-sans touch-none select-none">
 
-      {/* HEADER: Relative positioning with safe area */}
+      {/* HEADER: Fixed at top */}
       <header
-        className="relative bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-end justify-between px-4 pb-3 z-30 shadow-lg shrink-0"
+        className="fixed top-0 left-0 right-0 bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-end justify-between px-4 pb-3 z-30 shadow-lg"
         style={{
           paddingTop: 'env(safe-area-inset-top)',
           height: 'calc(4rem + env(safe-area-inset-top))'
@@ -222,9 +222,13 @@ function App() {
         </div>
       </header>
 
-      {/* MAIN: Flexible space between header and footer */}
+      {/* MAIN: Fixed between header and footer */}
       <main
-        className="flex-1 bg-[#1e1e1e] z-0 overflow-hidden relative"
+        className="fixed left-0 right-0 bg-[#1e1e1e] z-0 overflow-hidden"
+        style={{
+          top: 'calc(4rem + env(safe-area-inset-top))',
+          bottom: 'calc(3.5rem + env(safe-area-inset-bottom))'
+        }}
       >
         <div className={`absolute inset-0 transition-transform duration-300 transform w-full h-full ${activeTab === Tab.EDITOR ? 'translate-x-0' : '-translate-x-full'}`}>
           {activeFile.type === 'javascript' ? (
@@ -255,9 +259,9 @@ function App() {
         </div>
       </main>
 
-      {/* FOOTER: Relative positioning with Safe Area Fill */}
+      {/* FOOTER: Fixed at bottom of screen */}
       <nav
-        className="relative bg-[#2D2D2D] border-t border-[#3D3D3D] z-40 select-none shadow-[0_-4px_10px_rgba(0,0,0,0.2)] shrink-0"
+        className="fixed bottom-0 left-0 right-0 bg-[#2D2D2D] border-t border-[#3D3D3D] z-40 select-none shadow-[0_-4px_10px_rgba(0,0,0,0.2)]"
         style={{
           height: '3.5rem',
           paddingBottom: 'env(safe-area-inset-bottom)'
