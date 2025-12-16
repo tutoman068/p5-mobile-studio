@@ -128,4 +128,3 @@ export const generateP5HTML = (mainCode: string, files: AppFile[]) => {
 </html>
 `;
 };
-
