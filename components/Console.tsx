@@ -19,11 +19,15 @@ const Console: React.FC<ConsoleProps> = ({ logs, isOpen, onClose, onClear }) => 
     }
   }, [logs, isOpen]);
 
-  if (!isOpen) return null;
-
   return (
     <div 
-      className="absolute left-0 right-0 h-48 bg-[#1e1e1e] border-t border-[#3D3D3D] shadow-2xl flex flex-col z-10 bottom-0"
+      className={`fixed left-0 right-0 h-[250px] max-h-[40vh] bg-[#1e1e1e] border-t border-[#3D3D3D] shadow-[-10px_-10px_30px_rgba(0,0,0,0.5)] flex flex-col z-40 transition-transform duration-300 ease-in-out ${
+        isOpen ? 'translate-y-0' : 'translate-y-[120%]'
+      }`}
+      style={{
+        // Sit exactly on top of the footer (3.5rem + safe-area)
+        bottom: 'calc(3.5rem + env(safe-area-inset-bottom))'
+      }}
     >
       <div className="flex items-center justify-between px-4 py-2 bg-[#2D2D2D] border-b border-[#3D3D3D]">
         <h3 className="text-xs font-bold text-gray-300 uppercase tracking-wider">Console ({logs.length})</h3>
