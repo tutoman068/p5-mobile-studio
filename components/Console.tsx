@@ -21,18 +21,19 @@ const Console: React.FC<ConsoleProps> = ({ logs, isOpen, onClose, onClear }) => 
 
   return (
     <div 
-      className={`fixed bottom-0 left-0 right-0 bg-[#1e1e1e] border-t border-[#3D3D3D] shadow-2xl flex flex-col z-40 transition-transform duration-300 cubic-bezier(0.16, 1, 0.3, 1) ${
+      className={`absolute bottom-0 left-0 right-0 bg-[#1e1e1e] border-t border-[#3D3D3D] shadow-2xl flex flex-col z-40 transition-transform duration-300 cubic-bezier(0.16, 1, 0.3, 1) ${
         isOpen ? 'translate-y-0' : 'translate-y-[100%]'
       }`}
       style={{
-        // Height is roughly 40% of viewport
-        height: '40dvh', 
-        // IMPORTANT: Add padding at the bottom equal to the footer height (3.5rem + safe-area)
-        // This ensures the logs are visible ABOVE the footer, while the container background slides up from behind it.
+        // Height: 45% of viewport
+        height: '45dvh', 
+        // Padding bottom equal to Footer height (3.5rem + safe-area)
+        // This ensures the content area ends exactly where the footer begins visually, 
+        // while the background extends all the way down behind the footer.
         paddingBottom: 'calc(3.5rem + env(safe-area-inset-bottom))'
       }}
     >
-      <div className="flex items-center justify-between px-4 py-2 bg-[#2D2D2D] border-b border-[#3D3D3D]">
+      <div className="flex items-center justify-between px-4 py-2 bg-[#2D2D2D] border-b border-[#3D3D3D] shrink-0">
         <h3 className="text-xs font-bold text-gray-300 uppercase tracking-wider">Console ({logs.length})</h3>
         <div className="flex items-center gap-2">
           <button onClick={onClear} className="p-1 hover:bg-[#3D3D3D] rounded text-gray-400 hover:text-white transition-colors">
