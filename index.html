@@ -50,17 +50,18 @@
       }
       
       html {
-        height: 100dvh;
-        width: 100vw;
+        height: 100%;
+        width: 100%;
         overflow: hidden;
         background-color: #18181b;
-        /* Prevent bounce on the root element */
         overscroll-behavior-y: none;
       }
 
       body {
-        /* Remove position: fixed which locks height on initial load. Use 100dvh instead. */
-        min-height: 100dvh;
+        /* CRITICAL FIX: Lock body to viewport to prevent iOS rubber-banding and address bar quirks */
+        position: fixed;
+        inset: 0;
+        height: 100%;
         width: 100%;
         margin: 0;
         padding: 0;
@@ -74,7 +75,7 @@
 
       #root {
         width: 100%;
-        height: 100dvh; /* Explicitly use dynamic viewport height */
+        height: 100%;
         display: flex;
         flex-direction: column;
         overflow: hidden;
