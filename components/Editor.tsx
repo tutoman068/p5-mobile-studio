@@ -1,45 +1,53 @@
+
 import React, { useState } from 'react';
 import Editor from 'react-simple-code-editor';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-javascript';
+import { Copy, RotateCcw, RotateCw, Check } from 'lucide-react';
 
 interface CodeEditorProps {
   code: string;
   onChange: (code: string) => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
+  readOnly?: boolean;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ code, onChange }) => {
+const CodeEditor: React.FC<CodeEditorProps> = ({ 
+  code, onChange, onUndo, onRedo, canUndo, canRedo, readOnly = false 
+}) => {
   const [currentLine, setCurrentLine] = useState(1);
+  const [copied, setCopied] = useState(false);
 
   // Split code into lines to count them
   const lines = code.split('\n');
   
-  // Handle cursor movement to update current line
   const handleCursor = (e: any) => {
     const textarea = e.target;
     if (!textarea) return;
-    
     const selectionStart = textarea.selectionStart;
     const value = textarea.value;
-    
-    // Calculate line number based on newline characters up to cursor
     const line = value.substring(0, selectionStart).split('\n').length;
     setCurrentLine(line);
   };
 
-  const LINE_HEIGHT = 21; // Fixed line height for sync
-  const PADDING_Y = 16;   // Top/Bottom padding
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy', err);
+    }
+  };
 
-  // The structure here is crucial:
-  // 1. Outer div is the scroll container.
-  // 2. Inner div is a flex container with min-h-full. This allows it to grow if content is long,
-  //    or stay full height if content is short.
-  // 3. The Gutter is 'sticky' so it scrolls with content but stays visible horizontally? 
-  //    Actually, standard sticky left-0 makes it float over horizontal scroll.
-  //    But here we want vertical alignment.
-  
+  const LINE_HEIGHT = 21;
+  const PADDING_Y = 16;
+
   return (
-    <div className="h-full overflow-auto bg-[#1e1e1e] relative">
+    <div className="h-full overflow-auto bg-[#1e1e1e] relative group">
       <div className="flex min-h-full font-mono text-sm relative">
         {/* Line Numbers Gutter */}
         <div 
@@ -48,7 +56,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ code, onChange }) => {
             paddingTop: PADDING_Y, 
             paddingBottom: PADDING_Y,
             minWidth: '3rem',
-            // No fixed height here, let it stretch with the parent flex container
           }}
         >
           {lines.map((_, i) => (
@@ -66,7 +73,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ code, onChange }) => {
 
         {/* Editor Area */}
         <div className="flex-1 min-w-0 relative">
-          {/* Active Line Highlight Background */}
           <div 
             className="absolute left-0 right-0 bg-[#ED225D]/10 pointer-events-none transition-all duration-75 border-l-2 border-[#ED225D]"
             style={{ 
@@ -88,16 +94,46 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ code, onChange }) => {
               fontSize: 14,
               lineHeight: `${LINE_HEIGHT}px`,
               backgroundColor: 'transparent',
-              whiteSpace: 'pre', // Disable wrapping to keep lines in sync with gutter
+              whiteSpace: 'pre',
               minHeight: '100%'
             }}
             textareaClassName="focus:outline-none"
             onClick={handleCursor}
             onKeyUp={handleCursor}
             onSelect={handleCursor}
+            disabled={readOnly}
           />
         </div>
       </div>
+
+      {/* Floating Toolbar */}
+      {!readOnly && (
+        <div className="fixed bottom-20 right-4 z-20 flex gap-2">
+           <div className="flex bg-[#2D2D2D]/90 backdrop-blur border border-[#3D3D3D] rounded-full shadow-xl p-1.5 items-center gap-1">
+             <button 
+                onClick={onUndo} 
+                disabled={!canUndo}
+                className="p-2 rounded-full hover:bg-white/10 text-gray-300 disabled:opacity-30 transition-colors"
+             >
+               <RotateCcw size={18} />
+             </button>
+             <button 
+                onClick={onRedo} 
+                disabled={!canRedo}
+                className="p-2 rounded-full hover:bg-white/10 text-gray-300 disabled:opacity-30 transition-colors"
+             >
+               <RotateCw size={18} />
+             </button>
+             <div className="w-px h-4 bg-gray-600 mx-1"></div>
+             <button 
+                onClick={handleCopy} 
+                className="p-2 rounded-full hover:bg-white/10 text-gray-300 transition-colors relative"
+             >
+               {copied ? <Check size={18} className="text-green-400" /> : <Copy size={18} />}
+             </button>
+           </div>
+        </div>
+      )}
     </div>
   );
 };
