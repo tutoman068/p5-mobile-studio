@@ -22,13 +22,13 @@ const Console: React.FC<ConsoleProps> = ({ logs, isOpen, onClose, onClear }) => 
   return (
     <div 
       className={`fixed bottom-0 left-0 right-0 bg-[#1e1e1e] border-t border-[#3D3D3D] shadow-2xl flex flex-col z-40 transition-transform duration-300 cubic-bezier(0.16, 1, 0.3, 1) ${
-        isOpen ? 'translate-y-0' : 'translate-y-full'
+        isOpen ? 'translate-y-0' : 'translate-y-[100%]'
       }`}
       style={{
-        // Height is roughly 45% of viewport
-        height: '45dvh', 
+        // Height is roughly 40% of viewport
+        height: '40dvh', 
         // IMPORTANT: Add padding at the bottom equal to the footer height (3.5rem + safe-area)
-        // This ensures the content is visible ABOVE the footer, while the background extends behind it.
+        // This ensures the logs are visible ABOVE the footer, while the container background slides up from behind it.
         paddingBottom: 'calc(3.5rem + env(safe-area-inset-bottom))'
       }}
     >
