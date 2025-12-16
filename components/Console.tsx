@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import { ConsoleLog } from '../types';
 import { X, Trash2, AlertCircle, Info, AlertTriangle } from 'lucide-react';
@@ -21,14 +22,14 @@ const Console: React.FC<ConsoleProps> = ({ logs, isOpen, onClose, onClear }) => 
   if (!isOpen) return null;
 
   return (
-    <div className="absolute bottom-16 left-0 right-0 h-48 bg-gray-900 border-t border-gray-700 shadow-xl flex flex-col z-20 backdrop-blur-md bg-opacity-95">
-      <div className="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700">
+    <div className="absolute bottom-16 left-0 right-0 h-48 bg-[#1e1e1e] border-t border-[#3D3D3D] shadow-2xl flex flex-col z-30">
+      <div className="flex items-center justify-between px-4 py-2 bg-[#2D2D2D] border-b border-[#3D3D3D]">
         <h3 className="text-xs font-bold text-gray-300 uppercase tracking-wider">Console ({logs.length})</h3>
         <div className="flex items-center gap-2">
-          <button onClick={onClear} className="p-1 hover:bg-gray-700 rounded text-gray-400 hover:text-white transition-colors">
+          <button onClick={onClear} className="p-1 hover:bg-[#3D3D3D] rounded text-gray-400 hover:text-white transition-colors">
             <Trash2 size={14} />
           </button>
-          <button onClick={onClose} className="p-1 hover:bg-gray-700 rounded text-gray-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="p-1 hover:bg-[#3D3D3D] rounded text-gray-400 hover:text-white transition-colors">
             <X size={14} />
           </button>
         </div>
@@ -38,7 +39,7 @@ const Console: React.FC<ConsoleProps> = ({ logs, isOpen, onClose, onClear }) => 
           <div className="text-gray-500 italic p-2 text-center">No logs output</div>
         ) : (
           logs.map((log) => (
-            <div key={log.id} className={`flex items-start gap-2 border-b border-gray-800 pb-1 last:border-0 ${
+            <div key={log.id} className={`flex items-start gap-2 border-b border-[#333] pb-1 last:border-0 ${
               log.type === 'error' ? 'text-red-400 bg-red-900/10' : 
               log.type === 'warn' ? 'text-yellow-400' : 'text-gray-300'
             }`}>
