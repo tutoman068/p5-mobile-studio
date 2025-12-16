@@ -286,6 +286,7 @@ function App() {
             <span className="text-[10px] font-medium">Console</span>
           </button>
         </div>
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-[env(safe-area-inset-bottom)] bg-[#2D2D2D]" />
       </nav>
 
       {/* CONSOLE */}
@@ -303,3 +304,4 @@ function App() {
 }
 
 export default App;
+
