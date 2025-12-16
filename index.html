@@ -54,6 +54,8 @@
         width: 100%;
         overflow: hidden;
         background-color: #18181b;
+        /* Prevent bounce on the root element */
+        overscroll-behavior-y: none;
       }
 
       body {
@@ -69,6 +71,8 @@
         color: white;
         touch-action: none; /* Disables double-tap zoom etc */
         -webkit-overflow-scrolling: touch;
+        /* Stronger bounce prevention */
+        overscroll-behavior-y: none;
       }
 
       #root {
@@ -131,3 +135,4 @@
     </script>
   </body>
 </html>
+
