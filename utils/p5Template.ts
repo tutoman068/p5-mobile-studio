@@ -2,33 +2,49 @@
 import { AppFile } from '../types';
 
 export const generateP5HTML = (mainCode: string, files: AppFile[]) => {
-  // 1. Separate JS files and Assets
+  // 1. Helper to build full path for a file
+  const getFullPath = (file: AppFile, allFiles: AppFile[]): string => {
+    if (!file.parentId) return file.name;
+    const parent = allFiles.find(f => f.id === file.parentId);
+    return parent ? `${getFullPath(parent, allFiles)}/${file.name}` : file.name;
+  };
+
+  // 2. Separate JS files and Assets
+  // We ignore folders themselves, we only care about the files inside them
   const jsFiles = files.filter(f => f.type === 'javascript' && f.name !== 'sketch.js');
   const assets = files.filter(f => f.type === 'image' || f.type === 'video');
 
-  // 2. Prepare Asset Replacement Logic
-  // We need to replace string literals in the code that match asset filenames with their blob URLs
+  // 3. Asset Replacement Logic
+  // Replace "path/to/file.png" with blob:url
   let processedMainCode = mainCode;
-  let processedExtraJs = "";
-
-  // Helper to replace filenames in code
+  
   const replaceAssetsInCode = (code: string) => {
     let newCode = code;
     assets.forEach(asset => {
-      // Regex looks for "filename.ext" or 'filename.ext'
-      // We escape the filename to be regex safe
-      const escapedName = asset.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`(['"])${escapedName}(['"])`, 'g');
+      const fullPath = getFullPath(asset, files);
+      // Escape for regex
+      const escapedPath = fullPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      
+      // Match string literals containing the path
+      // Note: This is a simple replacer. It might replace valid strings that aren't paths if they match exactly.
+      const regex = new RegExp(`(['"])${escapedPath}(['"])`, 'g');
       newCode = newCode.replace(regex, `$1${asset.content}$2`);
+      
+      // Also try replacing just the filename if it's in the root or user didn't use full path (optional fallback)
+      if (!asset.parentId) {
+         const escapedName = asset.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+         const regexName = new RegExp(`(['"])${escapedName}(['"])`, 'g');
+         newCode = newCode.replace(regexName, `$1${asset.content}$2`);
+      }
     });
     return newCode;
   };
 
   processedMainCode = replaceAssetsInCode(mainCode);
   
-  // 3. Concatenate extra JS files (Classes, etc.) BEFORE the main script
+  let processedExtraJs = "";
   jsFiles.forEach(file => {
-    processedExtraJs += `\n/* File: ${file.name} */\n${replaceAssetsInCode(file.content)}\n`;
+    processedExtraJs += `\n/* File: ${getFullPath(file, files)} */\n${replaceAssetsInCode(file.content)}\n`;
   });
 
   return `
@@ -61,7 +77,6 @@ export const generateP5HTML = (mainCode: string, files: AppFile[]) => {
       }
     </style>
     <script>
-      // Capture console logs and errors to send back to parent
       (function() {
         const originalLog = console.log;
         const originalError = console.error;
@@ -74,9 +89,7 @@ export const generateP5HTML = (mainCode: string, files: AppFile[]) => {
               type: type,
               message: args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')
             }, '*');
-          } catch (e) {
-            // circular reference
-          }
+          } catch (e) { }
         }
 
         console.log = function(...args) {
@@ -103,13 +116,8 @@ export const generateP5HTML = (mainCode: string, files: AppFile[]) => {
   </head>
   <body>
     <script>
-      // Prevent default touch behaviors in the iframe
       document.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
-      
-      // Inject Extra JS Files (Classes, Utilities)
       ${processedExtraJs}
-
-      // Main Sketch
       try {
         ${processedMainCode}
       } catch (e) {
@@ -120,3 +128,4 @@ export const generateP5HTML = (mainCode: string, files: AppFile[]) => {
 </html>
 `;
 };
+
