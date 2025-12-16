@@ -186,9 +186,9 @@ function App() {
   };
 
   return (
-    // ROOT: Relative container inside the Fixed Body. 
-    // Using h-full to match the fixed body height.
-    <div className="relative w-full h-full bg-[#18181b] flex flex-col overflow-hidden text-white font-sans touch-none select-none">
+    // ROOT: Use 100dvh (Dynamic Viewport Height) to explicitly fit the actual visible screen,
+    // ignoring browser address bars or standalone mode quirks.
+    <div className="relative w-full h-[100dvh] bg-[#18181b] flex flex-col overflow-hidden text-white font-sans touch-none select-none">
       
       {/* HEADER */}
       <header 
@@ -254,33 +254,43 @@ function App() {
         </div>
       </main>
 
-      {/* FOOTER - Z-INDEX 40 */}
+      {/* FOOTER - Updated Layout */}
+      {/* 
+         Structure:
+         1. <nav>: The background wrapper. Handles safe-area padding at the bottom.
+         2. <div>: The content container. Strictly h-14 (56px). Centers the buttons.
+         
+         This separation prevents 'items-center' on the parent from centering buttons 
+         in the middle of (Content + SafeArea), keeping them flush to the top of the footer area.
+      */}
       <nav 
-        className="shrink-0 w-full bg-[#2D2D2D] border-t border-[#3D3D3D] flex items-center justify-around z-40 select-none shadow-[0_-4px_10px_rgba(0,0,0,0.2)] relative"
+        className="shrink-0 w-full bg-[#2D2D2D] border-t border-[#3D3D3D] z-40 select-none shadow-[0_-4px_10px_rgba(0,0,0,0.2)] relative"
         style={{
+          // Only add padding. Do not force height. The Nav will grow to accommodate content + padding.
           paddingBottom: 'env(safe-area-inset-bottom)',
-          height: 'calc(3.5rem + env(safe-area-inset-bottom))'
         }}
       >
-        <button onClick={() => setActiveTab(Tab.EDITOR)} className={`flex flex-col items-center gap-1 w-full pb-1 transition-colors active:scale-95 ${activeTab === Tab.EDITOR ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}>
-          <CodeIcon size={20} />
-          <span className="text-[10px] font-medium">Code</span>
-        </button>
-        <button onClick={() => setActiveTab(Tab.PREVIEW)} className={`flex flex-col items-center gap-1 w-full pb-1 transition-colors active:scale-95 ${activeTab === Tab.PREVIEW ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}>
-          <Eye size={20} />
-          <span className="text-[10px] font-medium">Preview</span>
-        </button>
-        <button onClick={() => { setIsConsoleOpen(!isConsoleOpen); setUnreadLogs(false); }} className={`flex flex-col items-center gap-1 w-full pb-1 transition-colors relative active:scale-95 ${isConsoleOpen ? 'text-white' : 'text-gray-400 hover:text-white'}`}>
-          <div className="relative">
-            <Terminal size={20} />
-            {unreadLogs && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-[#2D2D2D]" />}
-            {logs.some(l => l.type === 'error') && !isConsoleOpen && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#2D2D2D]" />}
-          </div>
-          <span className="text-[10px] font-medium">Console</span>
-        </button>
+        <div className="flex items-center justify-around w-full h-14">
+          <button onClick={() => setActiveTab(Tab.EDITOR)} className={`flex flex-col items-center gap-1 w-full pb-1 transition-colors active:scale-95 ${activeTab === Tab.EDITOR ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}>
+            <CodeIcon size={20} />
+            <span className="text-[10px] font-medium">Code</span>
+          </button>
+          <button onClick={() => setActiveTab(Tab.PREVIEW)} className={`flex flex-col items-center gap-1 w-full pb-1 transition-colors active:scale-95 ${activeTab === Tab.PREVIEW ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}>
+            <Eye size={20} />
+            <span className="text-[10px] font-medium">Preview</span>
+          </button>
+          <button onClick={() => { setIsConsoleOpen(!isConsoleOpen); setUnreadLogs(false); }} className={`flex flex-col items-center gap-1 w-full pb-1 transition-colors relative active:scale-95 ${isConsoleOpen ? 'text-white' : 'text-gray-400 hover:text-white'}`}>
+            <div className="relative">
+              <Terminal size={20} />
+              {unreadLogs && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-[#2D2D2D]" />}
+              {logs.some(l => l.type === 'error') && !isConsoleOpen && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#2D2D2D]" />}
+            </div>
+            <span className="text-[10px] font-medium">Console</span>
+          </button>
+        </div>
       </nav>
 
-      {/* CONSOLE - Z-INDEX 50 (Higher than Footer Z-40) */}
+      {/* CONSOLE - Z-INDEX 50 */}
       <Console 
         logs={logs} 
         isOpen={isConsoleOpen} 
@@ -295,3 +305,4 @@ function App() {
 }
 
 export default App;
+
