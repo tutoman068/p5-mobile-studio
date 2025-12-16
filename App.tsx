@@ -262,13 +262,12 @@ function App() {
 
       {/* FOOTER: Fixed Bottom with Safe Area Fill */}
       <nav 
-        className="fixed bottom-0 left-0 right-0 bg-[#2D2D2D] border-t border-[#3D3D3D] z-40 select-none shadow-[0_-4px_10px_rgba(0,0,0,0.2)]"
+        className="fixed bottom-0 left-0 right-0 bg-[#2D2D2D] border-t border-[#3D3D3D] z-40 select-none shadow-[0_-4px_10px_rgba(0,0,0,0.2)] relative"
         style={{
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          minHeight: 'calc(3.5rem + env(safe-area-inset-bottom))'
+          height: 'calc(3.5rem + env(safe-area-inset-bottom))'
         }}
       >
-        <div className="flex items-center justify-around w-full h-14">
+        <div className="absolute top-0 left-0 right-0 flex items-center justify-around w-full h-14">
           <button onClick={() => setActiveTab(Tab.EDITOR)} className={`flex flex-col items-center gap-1 w-full pb-1 transition-colors active:scale-95 ${activeTab === Tab.EDITOR ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}>
             <CodeIcon size={20} />
             <span className="text-[10px] font-medium">Code</span>
@@ -304,3 +303,4 @@ function App() {
 }
 
 export default App;
+
