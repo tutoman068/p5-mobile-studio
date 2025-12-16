@@ -21,13 +21,17 @@ const Console: React.FC<ConsoleProps> = ({ logs, isOpen, onClose, onClear }) => 
 
   return (
     <div 
-      className={`fixed bottom-0 left-0 right-0 bg-[#1e1e1e] border-t border-[#3D3D3D] shadow-[0_-8px_30px_rgba(0,0,0,0.5)] flex flex-col z-50 transition-transform duration-300 cubic-bezier(0.16, 1, 0.3, 1) ${
+      className={`fixed left-0 right-0 bg-[#1e1e1e] border-t border-[#3D3D3D] shadow-[0_-8px_30px_rgba(0,0,0,0.5)] flex flex-col transition-transform duration-300 cubic-bezier(0.16, 1, 0.3, 1) ${
         isOpen ? 'translate-y-0' : 'translate-y-full'
       }`}
       style={{
-        // Height: 45% of viewport
+        // High Z-Index to strictly float above footer
+        zIndex: 100,
+        // Positioning: Always anchored to bottom of viewport
+        bottom: 0,
+        // Height: 45% of available screen
         height: '45dvh', 
-        // IMPORTANT: Add safe area padding so content doesn't get hidden by home bar
+        // Padding Bottom: Crucial for iPhone Home Indicator
         paddingBottom: 'env(safe-area-inset-bottom)'
       }}
     >
