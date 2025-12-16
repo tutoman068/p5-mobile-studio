@@ -260,13 +260,12 @@ function App() {
         </div>
       </main>
 
-      {/* FOOTER: Fixed Bottom with Natural Height from Padding */}
+      {/* FOOTER: Fixed Bottom with Safe Area Fill */}
       <nav 
         className="fixed bottom-0 left-0 right-0 bg-[#2D2D2D] border-t border-[#3D3D3D] z-40 select-none shadow-[0_-4px_10px_rgba(0,0,0,0.2)]"
         style={{
-          // Do NOT set explicit height here. Let it grow with padding + content.
-          // This ensures it always hugs the bottom edge.
           paddingBottom: 'env(safe-area-inset-bottom)',
+          minHeight: 'calc(3.5rem + env(safe-area-inset-bottom))'
         }}
       >
         <div className="flex items-center justify-around w-full h-14">
@@ -304,4 +303,3 @@ function App() {
 }
 
 export default App;
-
