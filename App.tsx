@@ -38,7 +38,7 @@ function App() {
   ]);
   const [activeFileId, setActiveFileId] = useState<string>('main');
   
-  // History State for the active file
+  // History State
   const [fileHistory, setFileHistory] = useState<Record<string, { past: string[], future: string[] }>>({
     'main': { past: [], future: [] }
   });
@@ -53,7 +53,6 @@ function App() {
 
   const activeFile = files.find(f => f.id === activeFileId) || files[0];
 
-  // --- History Management ---
   const updateFileContent = (newContent: string) => {
     setFileHistory(prev => ({
       ...prev,
@@ -131,7 +130,6 @@ function App() {
     setActiveTab(Tab.EDITOR);
   }, []);
 
-  // --- File Operations ---
   const handleAddFile = (name: string, type: FileType, parentId: string | null) => {
     const newFile: AppFile = {
       id: Math.random().toString(36).substr(2, 9),
@@ -188,14 +186,15 @@ function App() {
   };
 
   return (
-    // ROOT: Flex Column Layout. 100dvh ensures it fits the viewport exactly on mobile.
-    <div className="fixed inset-0 w-full h-[100dvh] bg-[#18181b] flex flex-col overflow-hidden text-white font-sans touch-none select-none">
+    // ROOT: RELATIVE + H-FULL. 
+    // We rely on index.html's `body { position: fixed; inset: 0 }` to set the viewport.
+    // This removes the "double fixed" conflict on iOS.
+    <div className="relative w-full h-full bg-[#18181b] flex flex-col overflow-hidden text-white font-sans touch-none select-none">
       
-      {/* HEADER: Fixed height, no absolute positioning needed in flex column */}
+      {/* HEADER */}
       <header 
         className="shrink-0 bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-end justify-between px-4 pb-3 z-30 shadow-lg relative"
         style={{
-          // Use padding for safe area, content height is standard 4rem (64px)
           paddingTop: 'calc(0.5rem + env(safe-area-inset-top))',
           height: 'calc(4rem + env(safe-area-inset-top))'
         }}
@@ -213,54 +212,29 @@ function App() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsFileManagerOpen(true)}
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-[#3D3D3D] text-gray-300 hover:bg-[#4D4D4D] hover:text-white transition-all active:scale-95 border border-white/5"
-          >
+          <button onClick={() => setIsFileManagerOpen(true)} className="flex items-center justify-center w-10 h-10 rounded-full bg-[#3D3D3D] text-gray-300 hover:bg-[#4D4D4D] hover:text-white transition-all active:scale-95 border border-white/5">
             <FolderOpen size={18} />
           </button>
-
-          <button
-            onClick={() => setIsAIModalOpen(true)}
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-tr from-purple-900 to-purple-700 border border-purple-500/30 text-purple-200 hover:brightness-110 transition-all active:scale-95 shadow-lg shadow-purple-900/30"
-          >
+          <button onClick={() => setIsAIModalOpen(true)} className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-tr from-purple-900 to-purple-700 border border-purple-500/30 text-purple-200 hover:brightness-110 transition-all active:scale-95 shadow-lg shadow-purple-900/30">
             <Sparkles size={18} />
           </button>
-          
-          <button
-            onClick={isRunning ? stopSketch : runSketch}
-            className={`flex items-center gap-2 px-4 h-10 rounded-full font-bold text-sm transition-all shadow-lg active:scale-95 border ${
-              isRunning 
-                ? 'bg-red-500/10 text-red-400 border-red-500/50 hover:bg-red-500/20' 
-                : 'bg-[#ED225D] text-white border-transparent hover:bg-[#c91d4e] shadow-pink-900/50'
-            }`}
-          >
-            {isRunning ? (
-              <>
-                <Square size={14} fill="currentColor" />
-                Stop
-              </>
-            ) : (
-              <>
-                <Play size={14} fill="currentColor" />
-                Run
-              </>
-            )}
+          <button onClick={isRunning ? stopSketch : runSketch} className={`flex items-center gap-2 px-4 h-10 rounded-full font-bold text-sm transition-all shadow-lg active:scale-95 border ${isRunning ? 'bg-red-500/10 text-red-400 border-red-500/50 hover:bg-red-500/20' : 'bg-[#ED225D] text-white border-transparent hover:bg-[#c91d4e] shadow-pink-900/50'}`}>
+            {isRunning ? <><Square size={14} fill="currentColor" /> Stop</> : <><Play size={14} fill="currentColor" /> Run</>}
           </button>
         </div>
       </header>
 
-      {/* MAIN: Flex-1 fills available space automatically */}
+      {/* MAIN */}
       <main className="flex-1 relative w-full overflow-hidden bg-[#1e1e1e] z-0">
         <div className={`absolute inset-0 transition-transform duration-300 transform w-full h-full ${activeTab === Tab.EDITOR ? 'translate-x-0' : '-translate-x-full'}`}>
           {activeFile.type === 'javascript' ? (
              <CodeEditor 
                code={activeFile.content} 
                onChange={updateFileContent} 
-               onUndo={undo}
-               onRedo={redo}
-               canUndo={(fileHistory[activeFileId]?.past?.length || 0) > 0}
-               canRedo={(fileHistory[activeFileId]?.future?.length || 0) > 0}
+               onUndo={undo} 
+               onRedo={redo} 
+               canUndo={(fileHistory[activeFileId]?.past?.length || 0) > 0} 
+               canRedo={(fileHistory[activeFileId]?.future?.length || 0) > 0} 
              />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
@@ -269,16 +243,9 @@ function App() {
             </div>
           )}
         </div>
-
         <div className={`absolute inset-0 bg-[#18181b] transition-transform duration-300 transform w-full h-full touch-none ${activeTab === Tab.PREVIEW ? 'translate-x-0' : 'translate-x-full'}`}>
           {isRunning && iframeSrc ? (
-             <iframe
-             src={iframeSrc}
-             className="w-full h-full border-none block"
-             title="p5.js sketch preview"
-             allow="camera; microphone; geolocation"
-             scrolling="no"
-           />
+             <iframe src={iframeSrc} className="w-full h-full border-none block" title="p5.js sketch preview" allow="camera; microphone; geolocation" scrolling="no" />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-gray-500 gap-4">
               <Play size={48} className="opacity-20" />
@@ -288,53 +255,33 @@ function App() {
         </div>
       </main>
 
-      {/* FOOTER: Fixed height, anchored in flex flow */}
+      {/* FOOTER - Z-INDEX 40 */}
       <nav 
-        className="shrink-0 w-full bg-[#2D2D2D] border-t border-[#3D3D3D] flex items-center justify-around z-30 select-none shadow-[0_-4px_10px_rgba(0,0,0,0.2)] relative"
+        className="shrink-0 w-full bg-[#2D2D2D] border-t border-[#3D3D3D] flex items-center justify-around z-40 select-none shadow-[0_-4px_10px_rgba(0,0,0,0.2)] relative"
         style={{
-          // Padding bottom handles the home indicator area
           paddingBottom: 'env(safe-area-inset-bottom)',
-          // Total height = content (3.5rem) + safe area
           height: 'calc(3.5rem + env(safe-area-inset-bottom))'
         }}
       >
-        <button
-          onClick={() => setActiveTab(Tab.EDITOR)}
-          className={`flex flex-col items-center gap-1 w-full pb-1 transition-colors active:scale-95 ${activeTab === Tab.EDITOR ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
-        >
+        <button onClick={() => setActiveTab(Tab.EDITOR)} className={`flex flex-col items-center gap-1 w-full pb-1 transition-colors active:scale-95 ${activeTab === Tab.EDITOR ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}>
           <CodeIcon size={20} />
           <span className="text-[10px] font-medium">Code</span>
         </button>
-
-        <button
-          onClick={() => setActiveTab(Tab.PREVIEW)}
-          className={`flex flex-col items-center gap-1 w-full pb-1 transition-colors active:scale-95 ${activeTab === Tab.PREVIEW ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
-        >
+        <button onClick={() => setActiveTab(Tab.PREVIEW)} className={`flex flex-col items-center gap-1 w-full pb-1 transition-colors active:scale-95 ${activeTab === Tab.PREVIEW ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}>
           <Eye size={20} />
           <span className="text-[10px] font-medium">Preview</span>
         </button>
-
-        <button
-          onClick={() => {
-            setIsConsoleOpen(!isConsoleOpen);
-            setUnreadLogs(false);
-          }}
-          className={`flex flex-col items-center gap-1 w-full pb-1 transition-colors relative active:scale-95 ${isConsoleOpen ? 'text-white' : 'text-gray-400 hover:text-white'}`}
-        >
+        <button onClick={() => { setIsConsoleOpen(!isConsoleOpen); setUnreadLogs(false); }} className={`flex flex-col items-center gap-1 w-full pb-1 transition-colors relative active:scale-95 ${isConsoleOpen ? 'text-white' : 'text-gray-400 hover:text-white'}`}>
           <div className="relative">
             <Terminal size={20} />
-            {unreadLogs && (
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-[#2D2D2D]" />
-            )}
-            {logs.some(l => l.type === 'error') && !isConsoleOpen && (
-               <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#2D2D2D]" />
-            )}
+            {unreadLogs && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-[#2D2D2D]" />}
+            {logs.some(l => l.type === 'error') && !isConsoleOpen && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#2D2D2D]" />}
           </div>
           <span className="text-[10px] font-medium">Console</span>
         </button>
       </nav>
 
-      {/* CONSOLE: Overlay on TOP of everything (Z-60) */}
+      {/* CONSOLE - Z-INDEX 50 (Higher than Footer) */}
       <Console 
         logs={logs} 
         isOpen={isConsoleOpen} 
@@ -342,26 +289,8 @@ function App() {
         onClear={() => setLogs([])} 
       />
 
-      {/* Overlays */}
-      <AIAssistant 
-        currentCode={activeFile.type === 'javascript' ? activeFile.content : ''} 
-        onCodeGenerated={handleAIResult} 
-        isOpen={isAIModalOpen} 
-        onClose={() => setIsAIModalOpen(false)} 
-      />
-      
-      <FileManager 
-        files={files}
-        activeFileId={activeFileId}
-        onSelectFile={(id) => { setActiveFileId(id); setIsFileManagerOpen(false); }}
-        onAddFile={handleAddFile}
-        onUploadFile={handleUploadFile}
-        onDeleteFile={handleDeleteFile}
-        onRenameFile={handleRenameFile}
-        onMoveFile={handleMoveFile}
-        isOpen={isFileManagerOpen}
-        onClose={() => setIsFileManagerOpen(false)}
-      />
+      <AIAssistant currentCode={activeFile.type === 'javascript' ? activeFile.content : ''} onCodeGenerated={handleAIResult} isOpen={isAIModalOpen} onClose={() => setIsAIModalOpen(false)} />
+      <FileManager files={files} activeFileId={activeFileId} onSelectFile={(id) => { setActiveFileId(id); setIsFileManagerOpen(false); }} onAddFile={handleAddFile} onUploadFile={handleUploadFile} onDeleteFile={handleDeleteFile} onRenameFile={handleRenameFile} onMoveFile={handleMoveFile} isOpen={isFileManagerOpen} onClose={() => setIsFileManagerOpen(false)} />
     </div>
   );
 }
