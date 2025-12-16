@@ -31,13 +31,13 @@ function windowResized() {
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.EDITOR);
-
+  
   // File System State
   const [files, setFiles] = useState<AppFile[]>([
     { id: 'main', name: 'sketch.js', parentId: null, content: DEFAULT_SKETCH, type: 'javascript' }
   ]);
   const [activeFileId, setActiveFileId] = useState<string>('main');
-
+  
   // History State
   const [fileHistory, setFileHistory] = useState<Record<string, { past: string[], future: string[] }>>({
     'main': { past: [], future: [] }
@@ -168,7 +168,7 @@ function App() {
       });
       return remaining;
     };
-
+    
     setFiles(prev => deleteRecursive(id, prev));
     if (activeFileId === id) setActiveFileId('main');
   };
@@ -186,15 +186,18 @@ function App() {
   };
 
   return (
-    // ROOT: Container for fixed positioned elements
-    <div className="relative w-full h-full bg-[#18181b] overflow-hidden text-white font-sans touch-none select-none">
-
-      {/* HEADER: Fixed at top */}
-      <header
-        className="fixed top-0 left-0 right-0 bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-end justify-between px-4 pb-3 z-30 shadow-lg"
+    // ROOT: Flex Column Layout. 100dvh ensures it fits the visual viewport exactly.
+    // We do NOT use fixed positioning for Header/Footer to avoid coordinate issues.
+    // Instead, we use flex-1 for Main to take up remaining space.
+    <div className="flex flex-col w-full h-[100dvh] bg-[#18181b] overflow-hidden text-white font-sans touch-none select-none">
+      
+      {/* HEADER: Flex Item, Fixed Height */}
+      <header 
+        className="shrink-0 bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-end justify-between px-4 pb-3 z-30 shadow-lg relative"
         style={{
+          // Include safe area top in height calculation or just padding
           paddingTop: 'env(safe-area-inset-top)',
-          height: 'calc(4rem + env(safe-area-inset-top))'
+          minHeight: 'calc(4rem + env(safe-area-inset-top))'
         }}
       >
         <div className="flex items-center gap-2">
@@ -222,34 +225,28 @@ function App() {
         </div>
       </header>
 
-      {/* MAIN: Fixed between header and footer */}
-      <main
-        className="fixed left-0 right-0 bg-[#1e1e1e] z-0 overflow-hidden"
-        style={{
-          top: 'calc(4rem + env(safe-area-inset-top))',
-          bottom: 'calc(3.5rem + env(safe-area-inset-bottom))'
-        }}
-      >
+      {/* MAIN: Flex Item, Grows to fill space */}
+      <main className="flex-1 relative w-full overflow-hidden bg-[#1e1e1e] z-0">
         <div className={`absolute inset-0 transition-transform duration-300 transform w-full h-full ${activeTab === Tab.EDITOR ? 'translate-x-0' : '-translate-x-full'}`}>
           {activeFile.type === 'javascript' ? (
-            <CodeEditor
-              code={activeFile.content}
-              onChange={updateFileContent}
-              onUndo={undo}
-              onRedo={redo}
-              canUndo={(fileHistory[activeFileId]?.past?.length || 0) > 0}
-              canRedo={(fileHistory[activeFileId]?.future?.length || 0) > 0}
-            />
+             <CodeEditor 
+               code={activeFile.content} 
+               onChange={updateFileContent} 
+               onUndo={undo} 
+               onRedo={redo} 
+               canUndo={(fileHistory[activeFileId]?.past?.length || 0) > 0} 
+               canRedo={(fileHistory[activeFileId]?.future?.length || 0) > 0} 
+             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
-              {activeFile.type === 'image' && <ImageIcon size={48} className="mb-4 opacity-50" />}
+              {activeFile.type === 'image' && <ImageIcon size={48} className="mb-4 opacity-50"/>}
               <p>Preview not available for this file type.</p>
             </div>
           )}
         </div>
         <div className={`absolute inset-0 bg-[#18181b] transition-transform duration-300 transform w-full h-full touch-none ${activeTab === Tab.PREVIEW ? 'translate-x-0' : 'translate-x-full'}`}>
           {isRunning && iframeSrc ? (
-            <iframe src={iframeSrc} className="w-full h-full border-none block" title="p5.js sketch preview" allow="camera; microphone; geolocation" scrolling="no" />
+             <iframe src={iframeSrc} className="w-full h-full border-none block" title="p5.js sketch preview" allow="camera; microphone; geolocation" scrolling="no" />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-gray-500 gap-4">
               <Play size={48} className="opacity-20" />
@@ -259,15 +256,15 @@ function App() {
         </div>
       </main>
 
-      {/* FOOTER: Fixed at bottom of screen */}
-      <nav
-        className="fixed bottom-0 left-0 right-0 bg-[#2D2D2D] border-t border-[#3D3D3D] z-40 select-none shadow-[0_-4px_10px_rgba(0,0,0,0.2)]"
+      {/* FOOTER: Flex Item, Shrinks only if needed, stays at bottom */}
+      <nav 
+        className="shrink-0 w-full bg-[#2D2D2D] border-t border-[#3D3D3D] z-40 select-none shadow-[0_-4px_10px_rgba(0,0,0,0.2)]"
         style={{
-          height: '3.5rem',
-          paddingBottom: 'env(safe-area-inset-bottom)'
+          // Standard padding for safe area
+          paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
-        <div className="absolute top-0 left-0 right-0 flex items-center justify-around w-full h-14">
+        <div className="flex items-center justify-around w-full h-14">
           <button onClick={() => setActiveTab(Tab.EDITOR)} className={`flex flex-col items-center gap-1 w-full pb-1 transition-colors active:scale-95 ${activeTab === Tab.EDITOR ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}>
             <CodeIcon size={20} />
             <span className="text-[10px] font-medium">Code</span>
@@ -287,12 +284,12 @@ function App() {
         </div>
       </nav>
 
-      {/* CONSOLE */}
-      <Console
-        logs={logs}
-        isOpen={isConsoleOpen}
-        onClose={() => setIsConsoleOpen(false)}
-        onClear={() => setLogs([])}
+      {/* CONSOLE - FIXED above footer */}
+      <Console 
+        logs={logs} 
+        isOpen={isConsoleOpen} 
+        onClose={() => setIsConsoleOpen(false)} 
+        onClear={() => setLogs([])} 
       />
 
       <AIAssistant currentCode={activeFile.type === 'javascript' ? activeFile.content : ''} onCodeGenerated={handleAIResult} isOpen={isAIModalOpen} onClose={() => setIsAIModalOpen(false)} />
@@ -302,3 +299,4 @@ function App() {
 }
 
 export default App;
+
