@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { ConsoleLog } from '../types';
 import { X, Trash2, AlertCircle, Info, AlertTriangle } from 'lucide-react';
@@ -22,7 +21,15 @@ const Console: React.FC<ConsoleProps> = ({ logs, isOpen, onClose, onClear }) => 
   if (!isOpen) return null;
 
   return (
-    <div className="absolute bottom-16 left-0 right-0 h-48 bg-[#1e1e1e] border-t border-[#3D3D3D] shadow-2xl flex flex-col z-30">
+    <div 
+      className="absolute left-0 right-0 h-48 bg-[#1e1e1e] border-t border-[#3D3D3D] shadow-2xl flex flex-col z-30"
+      style={{
+        // 4rem (h-16) + safe-area padding is roughly where the footer top is.
+        // We use env() to be precise. 
+        // Note: 4rem is the approximate height of the icon area (without safe area padding).
+        bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))' 
+      }}
+    >
       <div className="flex items-center justify-between px-4 py-2 bg-[#2D2D2D] border-b border-[#3D3D3D]">
         <h3 className="text-xs font-bold text-gray-300 uppercase tracking-wider">Console ({logs.length})</h3>
         <div className="flex items-center gap-2">
