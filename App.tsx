@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import CodeEditor from './components/Editor';
 import { generateP5HTML } from './utils/p5Template';
@@ -5,7 +6,7 @@ import { ConsoleLog, Tab, AppFile, FileType } from './types';
 import Console from './components/Console';
 import AIAssistant from './components/AIAssistant';
 import FileManager from './components/FileManager';
-import { Play, Square, Code as CodeIcon, Eye, Terminal, Sparkles, FolderOpen, Menu } from 'lucide-react';
+import { Play, Square, Code as CodeIcon, Eye, Terminal, Sparkles, FolderOpen } from 'lucide-react';
 
 const DEFAULT_SKETCH = `function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -33,12 +34,11 @@ function App() {
   
   // File System State
   const [files, setFiles] = useState<AppFile[]>([
-    { id: 'main', name: 'sketch.js', content: DEFAULT_SKETCH, type: 'javascript' }
+    { id: 'main', name: 'sketch.js', parentId: null, content: DEFAULT_SKETCH, type: 'javascript' }
   ]);
   const [activeFileId, setActiveFileId] = useState<string>('main');
   
   // History State for the active file
-  // Map fileId -> History Stack
   const [fileHistory, setFileHistory] = useState<Record<string, { past: string[], future: string[] }>>({
     'main': { past: [], future: [] }
   });
@@ -55,7 +55,6 @@ function App() {
 
   // --- History Management ---
   const updateFileContent = (newContent: string) => {
-    // 1. Push current content to past
     setFileHistory(prev => ({
       ...prev,
       [activeFileId]: {
@@ -63,44 +62,34 @@ function App() {
         future: []
       }
     }));
-
-    // 2. Update file
     setFiles(prev => prev.map(f => f.id === activeFileId ? { ...f, content: newContent } : f));
   };
 
   const undo = () => {
     const history = fileHistory[activeFileId] || { past: [], future: [] };
     if (history.past.length === 0) return;
-
     const previous = history.past[history.past.length - 1];
-    const newPast = history.past.slice(0, -1);
-    
     setFileHistory(prev => ({
       ...prev,
       [activeFileId]: {
-        past: newPast,
+        past: history.past.slice(0, -1),
         future: [activeFile.content, ...history.future]
       }
     }));
-    
     setFiles(prev => prev.map(f => f.id === activeFileId ? { ...f, content: previous } : f));
   };
 
   const redo = () => {
     const history = fileHistory[activeFileId] || { past: [], future: [] };
     if (history.future.length === 0) return;
-
     const next = history.future[0];
-    const newFuture = history.future.slice(1);
-
     setFileHistory(prev => ({
       ...prev,
       [activeFileId]: {
         past: [...history.past, activeFile.content],
-        future: newFuture
+        future: history.future.slice(1)
       }
     }));
-
     setFiles(prev => prev.map(f => f.id === activeFileId ? { ...f, content: next } : f));
   };
 
@@ -116,12 +105,10 @@ function App() {
         message: message,
         timestamp: Date.now()
       };
-
       setLogs(prev => [...prev, newLog]);
       if (!isConsoleOpen) setUnreadLogs(true);
       if (type === 'error') setIsConsoleOpen(true);
     };
-
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, [isConsoleOpen]);
@@ -129,10 +116,7 @@ function App() {
   const runSketch = useCallback(() => {
     setLogs([]);
     setUnreadLogs(false);
-    
-    // Find main sketch
-    const mainSketch = files.find(f => f.name === 'sketch.js')?.content || '';
-    
+    const mainSketch = files.find(f => f.name === 'sketch.js' && f.parentId === null)?.content || '';
     const html = generateP5HTML(mainSketch, files);
     const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
@@ -148,11 +132,12 @@ function App() {
   }, []);
 
   // --- File Operations ---
-  const handleAddFile = (name: string, type: FileType) => {
+  const handleAddFile = (name: string, type: FileType, parentId: string | null) => {
     const newFile: AppFile = {
       id: Math.random().toString(36).substr(2, 9),
       name,
       type,
+      parentId,
       content: type === 'javascript' ? '// New file' : ''
     };
     setFiles([...files, newFile]);
@@ -162,13 +147,14 @@ function App() {
     }
   };
 
-  const handleUploadFile = (file: File) => {
+  const handleUploadFile = (file: File, parentId: string | null) => {
     const type: FileType = file.type.startsWith('video') ? 'video' : 'image';
     const objectUrl = URL.createObjectURL(file);
     const newFile: AppFile = {
       id: Math.random().toString(36).substr(2, 9),
       name: file.name,
       type,
+      parentId,
       content: objectUrl,
       blob: file
     };
@@ -176,8 +162,26 @@ function App() {
   };
 
   const handleDeleteFile = (id: string) => {
-    setFiles(files.filter(f => f.id !== id));
+    // Recursive delete for folders
+    const deleteRecursive = (targetId: string, currentFiles: AppFile[]): AppFile[] => {
+      const children = currentFiles.filter(f => f.parentId === targetId);
+      let remaining = currentFiles.filter(f => f.id !== targetId);
+      children.forEach(child => {
+        remaining = deleteRecursive(child.id, remaining);
+      });
+      return remaining;
+    };
+    
+    setFiles(prev => deleteRecursive(id, prev));
     if (activeFileId === id) setActiveFileId('main');
+  };
+
+  const handleRenameFile = (id: string, newName: string) => {
+    setFiles(prev => prev.map(f => f.id === id ? { ...f, name: newName } : f));
+  };
+
+  const handleMoveFile = (id: string, newParentId: string | null) => {
+    setFiles(prev => prev.map(f => f.id === id ? { ...f, parentId: newParentId } : f));
   };
 
   const handleAIResult = (newCode: string) => {
@@ -185,14 +189,13 @@ function App() {
   };
 
   return (
-    // Used h-[100dvh] to force dynamic viewport height matching on iOS Safari
-    <div className="h-[100dvh] w-full flex flex-col bg-[#18181b] overflow-hidden text-white relative">
+    <div className="h-full w-full flex flex-col bg-[#18181b] overflow-hidden text-white relative">
       {/* Header */}
       <header 
-        className="bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-end justify-between px-4 pb-2 shrink-0 z-10 select-none relative shadow-lg"
+        className="bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-end justify-between px-4 pb-2 shrink-0 z-10 select-none relative shadow-lg fixed top-0 left-0 right-0 w-full"
         style={{
           paddingTop: 'env(safe-area-inset-top)',
-          minHeight: 'calc(3.5rem + env(safe-area-inset-top))'
+          height: 'calc(3.5rem + env(safe-area-inset-top))'
         }}
       >
         <div className="flex items-center gap-2 h-8">
@@ -203,7 +206,7 @@ function App() {
              onClick={() => setIsFileManagerOpen(true)}
              className="flex items-center gap-2 px-2 py-1 rounded hover:bg-white/5 active:bg-white/10 transition-colors"
           >
-            <span className="font-bold text-sm max-w-[100px] truncate">{activeFile.name}</span>
+            <span className="font-bold text-sm max-w-[120px] truncate">{activeFile.name}</span>
             <FolderOpen size={16} className="text-gray-400" />
           </button>
         </div>
@@ -239,18 +242,29 @@ function App() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 relative overflow-hidden w-full bg-[#1e1e1e]">
+      {/* Main Content with padding for fixed Header and Footer */}
+      <main 
+        className="flex-1 relative overflow-hidden w-full bg-[#1e1e1e]"
+        style={{
+          marginTop: 'calc(3.5rem + env(safe-area-inset-top))',
+          marginBottom: 'calc(4rem + env(safe-area-inset-bottom))' // Leave space for fixed footer
+        }}
+      >
         <div className={`absolute inset-0 transition-transform duration-300 transform w-full h-full ${activeTab === Tab.EDITOR ? 'translate-x-0' : '-translate-x-full'}`}>
-          <CodeEditor 
-            code={activeFile.content} 
-            onChange={updateFileContent} 
-            onUndo={undo}
-            onRedo={redo}
-            canUndo={(fileHistory[activeFileId]?.past?.length || 0) > 0}
-            canRedo={(fileHistory[activeFileId]?.future?.length || 0) > 0}
-            readOnly={activeFile.type !== 'javascript'}
-          />
+          {activeFile.type === 'javascript' ? (
+             <CodeEditor 
+               code={activeFile.content} 
+               onChange={updateFileContent} 
+               onUndo={undo}
+               onRedo={redo}
+               canUndo={(fileHistory[activeFileId]?.past?.length || 0) > 0}
+               canRedo={(fileHistory[activeFileId]?.future?.length || 0) > 0}
+             />
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-gray-500">
+              <p>Preview not available for this file type.</p>
+            </div>
+          )}
         </div>
 
         <div className={`absolute inset-0 bg-[#18181b] transition-transform duration-300 transform w-full h-full touch-none ${activeTab === Tab.PREVIEW ? 'translate-x-0' : 'translate-x-full'}`}>
@@ -278,18 +292,18 @@ function App() {
         />
       </main>
 
-      {/* Footer - Fixed Layout */}
+      {/* Footer - Fixed Position for Robust Mobile Layout */}
       <nav 
-        className="bg-[#2D2D2D] border-t border-[#3D3D3D] flex items-center justify-around shrink-0 z-10 select-none w-full"
+        className="bg-[#2D2D2D] border-t border-[#3D3D3D] flex items-center justify-around z-50 select-none fixed bottom-0 left-0 right-0 w-full"
         style={{
           paddingBottom: 'env(safe-area-inset-bottom)',
-          paddingTop: '8px',
-          height: 'auto'
+          height: 'calc(4rem + env(safe-area-inset-bottom))',
+          paddingTop: '0.5rem'
         }}
       >
         <button
           onClick={() => setActiveTab(Tab.EDITOR)}
-          className={`flex flex-col items-center gap-1 w-full p-2 transition-colors active:scale-95 ${activeTab === Tab.EDITOR ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
+          className={`flex flex-col items-center gap-1 w-full transition-colors active:scale-95 ${activeTab === Tab.EDITOR ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
         >
           <CodeIcon size={20} />
           <span className="text-[10px] font-medium">Code</span>
@@ -297,7 +311,7 @@ function App() {
 
         <button
           onClick={() => setActiveTab(Tab.PREVIEW)}
-          className={`flex flex-col items-center gap-1 w-full p-2 transition-colors active:scale-95 ${activeTab === Tab.PREVIEW ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
+          className={`flex flex-col items-center gap-1 w-full transition-colors active:scale-95 ${activeTab === Tab.PREVIEW ? 'text-[#ED225D]' : 'text-gray-400 hover:text-white'}`}
         >
           <Eye size={20} />
           <span className="text-[10px] font-medium">Preview</span>
@@ -308,7 +322,7 @@ function App() {
             setIsConsoleOpen(!isConsoleOpen);
             setUnreadLogs(false);
           }}
-          className={`flex flex-col items-center gap-1 w-full p-2 transition-colors relative active:scale-95 ${isConsoleOpen ? 'text-white bg-gray-700/50 rounded-lg mx-2' : 'text-gray-400 hover:text-white'}`}
+          className={`flex flex-col items-center gap-1 w-full transition-colors relative active:scale-95 ${isConsoleOpen ? 'text-white bg-gray-700/50 rounded-lg mx-2' : 'text-gray-400 hover:text-white'}`}
         >
           <div className="relative">
             <Terminal size={20} />
@@ -325,7 +339,7 @@ function App() {
 
       {/* Overlays */}
       <AIAssistant 
-        currentCode={activeFile.content} 
+        currentCode={activeFile.type === 'javascript' ? activeFile.content : ''} 
         onCodeGenerated={handleAIResult} 
         isOpen={isAIModalOpen} 
         onClose={() => setIsAIModalOpen(false)} 
@@ -338,6 +352,8 @@ function App() {
         onAddFile={handleAddFile}
         onUploadFile={handleUploadFile}
         onDeleteFile={handleDeleteFile}
+        onRenameFile={handleRenameFile}
+        onMoveFile={handleMoveFile}
         isOpen={isFileManagerOpen}
         onClose={() => setIsFileManagerOpen(false)}
       />
