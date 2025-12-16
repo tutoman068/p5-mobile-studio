@@ -187,19 +187,20 @@ function App() {
     updateFileContent(newCode);
   };
 
+  // LAYOUT CONSTANTS
+  // Header: 3.5rem (56px) + safe-area-top
+  // Footer: 3.5rem (56px) + safe-area-bottom
+  
   return (
-    // MAIN LAYOUT:
-    // Header: Fixed Top
-    // Footer: Fixed Bottom
-    // Main: Flex-1, scrollable, with padding to avoid overlap
-    <div className="flex flex-col h-[100dvh] w-full bg-[#18181b] overflow-hidden text-white relative">
+    // ROOT: Fixed full viewport, no scrolling on body
+    <div className="fixed inset-0 w-full h-[100dvh] bg-[#18181b] flex flex-col overflow-hidden text-white font-sans">
       
-      {/* HEADER - Fixed Top */}
+      {/* HEADER: Shrink-0, Fixed Height */}
       <header 
-        className="fixed top-0 left-0 right-0 bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-end justify-between px-4 pb-3 z-50 select-none shadow-lg"
+        className="shrink-0 bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-end justify-between px-4 pb-3 z-50 select-none shadow-lg relative"
         style={{
           paddingTop: 'calc(0.5rem + env(safe-area-inset-top))',
-          height: 'calc(4rem + env(safe-area-inset-top))' // Explicit height for padding calc
+          height: 'calc(4rem + env(safe-area-inset-top))'
         }}
       >
         <div className="flex items-center gap-2">
@@ -252,14 +253,9 @@ function App() {
         </div>
       </header>
 
-      {/* MAIN CONTENT AREA */}
-      <main 
-        className="flex-1 relative overflow-hidden w-full bg-[#1e1e1e]"
-        style={{
-          marginTop: 'calc(4rem + env(safe-area-inset-top))', // Space for Header
-          marginBottom: 'calc(3.5rem + env(safe-area-inset-bottom))' // Space for Footer
-        }}
-      >
+      {/* MAIN: Flex-1, fills remaining space */}
+      <main className="flex-1 relative w-full overflow-hidden bg-[#1e1e1e]">
+        {/* Editor Layer */}
         <div className={`absolute inset-0 transition-transform duration-300 transform w-full h-full ${activeTab === Tab.EDITOR ? 'translate-x-0' : '-translate-x-full'}`}>
           {activeFile.type === 'javascript' ? (
              <CodeEditor 
@@ -278,6 +274,7 @@ function App() {
           )}
         </div>
 
+        {/* Preview Layer */}
         <div className={`absolute inset-0 bg-[#18181b] transition-transform duration-300 transform w-full h-full touch-none ${activeTab === Tab.PREVIEW ? 'translate-x-0' : 'translate-x-full'}`}>
           {isRunning && iframeSrc ? (
              <iframe
@@ -294,9 +291,13 @@ function App() {
             </div>
           )}
         </div>
+        
+        {/* Console is now rendered OUTSIDE main to fix positioning relative to footer, or inside but fixed? 
+            Let's keep it here but styled as fixed in Console.tsx to be relative to viewport 
+        */}
       </main>
 
-      {/* CONSOLE (Now sits above Footer) */}
+      {/* CONSOLE: Z-Index 40 (Below Footer 50) */}
       <Console 
         logs={logs} 
         isOpen={isConsoleOpen} 
@@ -304,9 +305,9 @@ function App() {
         onClear={() => setLogs([])} 
       />
 
-      {/* FOOTER - Fixed Bottom */}
+      {/* FOOTER: Shrink-0, Fixed Height, Z-Index 50 (Top) */}
       <nav 
-        className="fixed bottom-0 left-0 right-0 bg-[#2D2D2D] border-t border-[#3D3D3D] flex items-center justify-around z-50 select-none backdrop-blur-md bg-[#2D2D2D]/95"
+        className="shrink-0 w-full bg-[#2D2D2D] border-t border-[#3D3D3D] flex items-center justify-around z-50 select-none relative shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
         style={{
           paddingBottom: 'env(safe-area-inset-bottom)',
           height: 'calc(3.5rem + env(safe-area-inset-bottom))',
