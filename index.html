@@ -7,12 +7,10 @@
     
     <!-- iOS PWA Settings -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <!-- Changed to black-translucent so content shows behind status bar -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="p5 Studio">
-    <meta name="theme-color" content="#2D2D2D">
+    <meta name="theme-color" content="#18181b">
     
-    <!-- App Icon (Data URI for p5 logo to avoid hosting images) -->
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23ED225D'/%3E%3Cpath d='M160 160h60v192h-60zm100 0h60v40h60v60h-60v42h60v50h-120z' fill='white'/%3E%3C/svg%3E">
     
     <title>p5.js Mobile Studio</title>
@@ -39,7 +37,6 @@
       }
     </script>
     <style>
-      /* Custom scrollbar for editor */
       ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
@@ -56,25 +53,22 @@
         height: 100%;
         width: 100%;
         overflow: hidden;
+        background-color: #18181b;
       }
 
       body {
+        /* FIXED LAYOUT LOCK for iOS */
         position: fixed;
         inset: 0;
         width: 100%;
         height: 100%;
         margin: 0;
         padding: 0;
-        overflow: hidden; /* Critical for locking the app */
+        overflow: hidden;
         background-color: #18181b;
         color: white;
-        /* REMOVED safe-area padding here to let App.tsx handle it precisely */
-        box-sizing: border-box;
-      }
-
-      /* Reset padding on body because we handle it in App components manually for full control */
-      body {
-        padding: 0 !important;
+        touch-action: none; /* Disables double-tap zoom etc */
+        -webkit-overflow-scrolling: touch;
       }
 
       #root {
@@ -110,22 +104,18 @@
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
     <script>
-      // Fallback error handler for startup issues
       window.onerror = function(msg, url, line, col, error) {
         if (document.getElementById('root').innerHTML === '') {
           document.body.innerHTML += '<div style="padding: 20px; color: red;"><h1>Startup Error</h1><p>' + msg + '</p></div>';
         }
       };
       
-      // Prevent default touch moves globally to stop rubber banding
-      // except in scrollable containers
       document.addEventListener('touchmove', function(e) {
         let target = e.target;
         let isScrollable = false;
         
         while (target && target !== document.body) {
           if (target.classList && (target.classList.contains('overflow-auto') || target.classList.contains('overflow-y-auto'))) {
-            // Check if it actually has scrollable content
             if (target.scrollHeight > target.clientHeight) {
               isScrollable = true;
               break;
