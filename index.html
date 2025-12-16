@@ -56,7 +56,7 @@
     }
 
     html {
-      height: 100dvh;
+      height: 100vh;
       width: 100%;
       overflow: hidden;
       background-color: #18181b;
@@ -64,9 +64,9 @@
     }
 
     body {
-      /* CRITICAL FIX: Use dvh (dynamic viewport height) to handle address bar changes */
+      /* CRITICAL FIX: Use viewport height, footer handles safe area */
       position: relative;
-      height: 100dvh;
+      height: 100vh;
       width: 100%;
       margin: 0;
       padding: 0;
