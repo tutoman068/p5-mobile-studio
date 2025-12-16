@@ -259,7 +259,8 @@ function App() {
       <nav
         className="relative bg-[#2D2D2D] border-t border-[#3D3D3D] z-40 select-none shadow-[0_-4px_10px_rgba(0,0,0,0.2)] shrink-0"
         style={{
-          height: 'calc(3.5rem + env(safe-area-inset-bottom))'
+          height: '3.5rem',
+          paddingBottom: 'env(safe-area-inset-bottom)'
         }}
       >
         <div className="absolute top-0 left-0 right-0 flex items-center justify-around w-full h-14">
@@ -280,7 +281,6 @@ function App() {
             <span className="text-[10px] font-medium">Console</span>
           </button>
         </div>
-        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-[env(safe-area-inset-bottom)] bg-[#2D2D2D]" />
       </nav>
 
       {/* CONSOLE */}
