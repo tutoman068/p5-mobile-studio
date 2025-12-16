@@ -186,9 +186,8 @@ function App() {
   };
 
   return (
-    // ROOT: RELATIVE + H-FULL. 
-    // We rely on index.html's `body { position: fixed; inset: 0 }` to set the viewport.
-    // This removes the "double fixed" conflict on iOS.
+    // ROOT: Relative container inside the Fixed Body. 
+    // Using h-full to match the fixed body height.
     <div className="relative w-full h-full bg-[#18181b] flex flex-col overflow-hidden text-white font-sans touch-none select-none">
       
       {/* HEADER */}
@@ -281,7 +280,7 @@ function App() {
         </button>
       </nav>
 
-      {/* CONSOLE - Z-INDEX 50 (Higher than Footer) */}
+      {/* CONSOLE - Z-INDEX 50 (Higher than Footer Z-40) */}
       <Console 
         logs={logs} 
         isOpen={isConsoleOpen} 
@@ -296,3 +295,4 @@ function App() {
 }
 
 export default App;
+
