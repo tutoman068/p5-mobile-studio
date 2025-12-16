@@ -186,8 +186,8 @@ function App() {
   };
 
   return (
-    // ROOT: 100dvh for proper mobile sizing
-    <div className="relative w-screen h-[100dvh] bg-[#18181b] overflow-hidden text-white font-sans touch-none select-none">
+    // ROOT: h-full matches fixed body height
+    <div className="relative w-full h-full bg-[#18181b] overflow-hidden text-white font-sans touch-none select-none">
       
       {/* HEADER: Fixed Top */}
       <header 
@@ -222,11 +222,12 @@ function App() {
         </div>
       </header>
 
-      {/* MAIN: Fixed Inset (Calculated) */}
+      {/* MAIN: Anchored between header and footer */}
       <main 
         className="fixed left-0 right-0 bg-[#1e1e1e] z-0 overflow-hidden"
         style={{
           top: 'calc(4rem + env(safe-area-inset-top))',
+          // Matches the implicit height of the footer (3.5rem content + padding)
           bottom: 'calc(3.5rem + env(safe-area-inset-bottom))'
         }}
       >
@@ -259,11 +260,12 @@ function App() {
         </div>
       </main>
 
-      {/* FOOTER: Fixed Bottom */}
+      {/* FOOTER: Fixed Bottom with Natural Height from Padding */}
       <nav 
         className="fixed bottom-0 left-0 right-0 bg-[#2D2D2D] border-t border-[#3D3D3D] z-40 select-none shadow-[0_-4px_10px_rgba(0,0,0,0.2)]"
         style={{
-          height: 'calc(3.5rem + env(safe-area-inset-bottom))',
+          // Do NOT set explicit height here. Let it grow with padding + content.
+          // This ensures it always hugs the bottom edge.
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
@@ -302,3 +304,4 @@ function App() {
 }
 
 export default App;
+
