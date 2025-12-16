@@ -186,15 +186,15 @@ function App() {
   };
 
   return (
-    // ROOT: Use 100dvh (Dynamic Viewport Height) to explicitly fit the actual visible screen,
-    // ignoring browser address bars or standalone mode quirks.
-    <div className="relative w-full h-[100dvh] bg-[#18181b] flex flex-col overflow-hidden text-white font-sans touch-none select-none">
+    // ROOT: Rigid Layout Container.
+    // 'h-full' inherits exactly from body's fixed height.
+    <div className="relative w-full h-full bg-[#18181b] overflow-hidden text-white font-sans touch-none select-none">
       
-      {/* HEADER */}
+      {/* HEADER: Absolute Top */}
       <header 
-        className="shrink-0 bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-end justify-between px-4 pb-3 z-30 shadow-lg relative"
+        className="absolute top-0 left-0 right-0 bg-[#2D2D2D] border-b border-[#3D3D3D] flex items-end justify-between px-4 pb-3 z-30 shadow-lg"
         style={{
-          paddingTop: 'calc(0.5rem + env(safe-area-inset-top))',
+          paddingTop: 'env(safe-area-inset-top)',
           height: 'calc(4rem + env(safe-area-inset-top))'
         }}
       >
@@ -223,8 +223,15 @@ function App() {
         </div>
       </header>
 
-      {/* MAIN */}
-      <main className="flex-1 relative w-full overflow-hidden bg-[#1e1e1e] z-0">
+      {/* MAIN: Absolute Middle */}
+      {/* Anchored between Header and Footer using calc() */}
+      <main 
+        className="absolute left-0 right-0 bg-[#1e1e1e] z-0 overflow-hidden"
+        style={{
+          top: 'calc(4rem + env(safe-area-inset-top))',
+          bottom: 'calc(3.5rem + env(safe-area-inset-bottom))'
+        }}
+      >
         <div className={`absolute inset-0 transition-transform duration-300 transform w-full h-full ${activeTab === Tab.EDITOR ? 'translate-x-0' : '-translate-x-full'}`}>
           {activeFile.type === 'javascript' ? (
              <CodeEditor 
@@ -254,19 +261,11 @@ function App() {
         </div>
       </main>
 
-      {/* FOOTER - Updated Layout */}
-      {/* 
-         Structure:
-         1. <nav>: The background wrapper. Handles safe-area padding at the bottom.
-         2. <div>: The content container. Strictly h-14 (56px). Centers the buttons.
-         
-         This separation prevents 'items-center' on the parent from centering buttons 
-         in the middle of (Content + SafeArea), keeping them flush to the top of the footer area.
-      */}
+      {/* FOOTER: Absolute Bottom */}
       <nav 
-        className="shrink-0 w-full bg-[#2D2D2D] border-t border-[#3D3D3D] z-40 select-none shadow-[0_-4px_10px_rgba(0,0,0,0.2)] relative"
+        className="absolute bottom-0 left-0 right-0 bg-[#2D2D2D] border-t border-[#3D3D3D] z-40 select-none shadow-[0_-4px_10px_rgba(0,0,0,0.2)]"
         style={{
-          // Only add padding. Do not force height. The Nav will grow to accommodate content + padding.
+          height: 'calc(3.5rem + env(safe-area-inset-bottom))',
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
@@ -290,7 +289,7 @@ function App() {
         </div>
       </nav>
 
-      {/* CONSOLE - Z-INDEX 50 */}
+      {/* CONSOLE - Z-INDEX 100 (Defined in Console.tsx, stays above footer) */}
       <Console 
         logs={logs} 
         isOpen={isConsoleOpen} 
@@ -305,4 +304,3 @@ function App() {
 }
 
 export default App;
-
